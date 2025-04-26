@@ -42,6 +42,16 @@ class MetaCommand:
                 return f'Loaded tables: {", ".join(loaded)}.'
             case "/list":
                 return mgr.list()
+            case "/clear":
+                if not args:
+                    raise ValueError("Usage: /clear <table> [<table2> ...]")
+                cleared = []
+                for table_name in args:
+                    mgr.clear(table_name)
+                    cleared.append(table_name)
+                if len(cleared) == 1:
+                    return f"Table '{cleared[0]}' cleared."
+                return f'Cleared tables: {", ".join(cleared)}.'
             case "/save":
                 if len(args) < 1:
                     raise ValueError("Usage: /save <table> [file.pkl]")
@@ -68,7 +78,8 @@ class MetaCommand:
                 return (
                     "Meta Commands:\n"
                     "  /create <tbl>         : Create a new empty table\n"
-                    "  /load <tbl>           : Load table <tbl> from auto-save directory\n"
+                    "  /load <tbl> [<tbl>...] : Load table(s) from auto-save directory\n"
+                    "  /clear <tbl> [<tbl>...] : Remove table(s) from memory and database\n"
                     "  /save <tbl> [f.pkl]   : Save table to .pkl file (default: <tbl>.pkl)\n"
                     "  /export <tbl> [f.csv] : Export table to .csv file (default: <tbl>.csv)\n"
                     "  /list                 : List current tables\n"
