@@ -92,6 +92,12 @@ def main() -> None:
     def _(event):
         """Submit the input when Meta+Enter is pressed."""
         event.current_buffer.validate_and_handle()
+
+    # Add a key binding for 'zz' to submit
+    @kb.add('z', 'z')
+    def _zz(event):
+        """Submit the input when 'zz' is pressed."""
+        event.current_buffer.validate_and_handle()
     # -----------------------------
 
     psession = PromptSession(history=HISTORY, completer=_build_completer(tables),

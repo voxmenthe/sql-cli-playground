@@ -51,11 +51,11 @@ pip install -e .
 
 ### Run the CLI
 ```bash
-poetry run sql-cli-playground
+poetry run sql
 ```
 or if installed via pip-only:
 ```bash
-sql-cli-playground
+sql
 ```
 
 ### Run tests
@@ -67,10 +67,18 @@ or if installed via pip-only:
 pytest
 ```
 
+## Keyboard Shortcuts ⌨️
+
+| Shortcut | Description |
+|----------|-------------|
+| `Meta+Enter` | Submit the current input (Alt+Enter or Esc followed by Enter) |
+| `zz` | Submit the current input (alternative to Meta+Enter) |
+| `Ctrl+D` | Exit the CLI |
+
 ## Quick Demo 🎬
 
 ```bash
-poetry run sql-cli-playground
+poetry run sql
 (tables: []) >> /create table1                                     # Create a new table
 (tables: ['table1']) >> import numpy as np; table1['col1'] = np.random.randint(1, 50, 5)  # Add data using Python
 (tables: ['table1']) >> table1['col2'] = np.random.rand(5) * 10    # Add another column

@@ -15,4 +15,4 @@ pytest          = "^7.0"
 
 
 [tool.poetry.scripts]
-sql-cli-playground = "src.cli:main"
+sql = "src.cli:main"
