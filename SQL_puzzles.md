@@ -23,8 +23,6 @@ pets2['age'] = [3, 5, 2, 7, 1]
 
 **Expected Output:** A table showing only the `name` and `species` columns for all 5 pets.
 
-DONE: SELECT name, species FROM pets;
-
 ---
 
 ## Puzzle 2: Filtering Data (Easy)
@@ -35,8 +33,6 @@ DONE: SELECT name, species FROM pets;
 
 **Expected Output:** A table showing the names 'Daisy'.
 
-DONE: SELECT name FROM pets WHERE species = 'Dog' AND age > 3;
-
 ---
 
 ## Puzzle 3: Aggregation and Grouping (Medium)
@@ -46,8 +42,6 @@ DONE: SELECT name FROM pets WHERE species = 'Dog' AND age > 3;
 **Setup Code:** (Use the `pets` table created in Puzzle 1)
 
 **Expected Output:** A table showing each `species` and its corresponding average age (e.g., Dog: 4.0, Cat: 3.0).
-
-DONE: SELECT species, AVG(age) FROM pets GROUP BY species;
 
 ---
 
@@ -66,8 +60,6 @@ owners['pet_id'] = [1, 2, 3, 4, 6] # Note: Pet ID 5 has no owner, Pet ID 6 doesn
 ```
 
 **Expected Output:** A table showing pet names alongside their owner's name for pets 1 through 4. Buddy/Alice, Lucy/Bob, Max/Carol, Daisy/David.
-
-DONE: SELECT p.name AS pet_name, o.name AS owner_name FROM pets p INNERJOIN owners o ON p.id = o.pet_id;
 
 ---
 
@@ -92,24 +84,6 @@ employees['salary'] = [60000, 80000, 85000, 65000, 70000, 75000, 90000]
 *   Engineering: Grace, 90000
 *   Sales: Frank, 75000
 
-DONE: 
-... SELECT department, MAX(salary) as max_sal FROM employees
-... GROUP BY department)
-...
-... SELECT e.name, e.salary, e.department FROM employees e
-... INNER JOIN MaxSalary ms
-... ON e.department = ms.department
-... AND e.salary = ms.max_sal;
-
-or
-
-... With RankedEmployees AS (
-... SELECT name, salary, department,
-... ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) as rn
-... FROM employees)
-... SELECT name, salary, department
-... FROM RankedEmployees
-... WHERE rn = 1;
 ---
 
 ## Puzzle 6: Self Join or Subquery (Hard)
@@ -133,18 +107,6 @@ managers['manager_id'] = [4, 7, 7, -1, 5, 2] # David, Grace, Grace, NULL (Top), 
 *   Bob (80000) does *not* earn more than Grace (90000).
 *   Frank (75000) earns more than Eve (70000).
 
-DONE: 
-... SELECT
-... e.name AS employee_name,
-... e.salary AS employee_salary,
-... mgr.name AS manager_name,
-... mgr.salary AS manager_salary
-... FROM employees e
-... JOIN managers m
-... ON e.emp_id = m.emp_id
-... JOIN employees mgr
-... ON m.manager_id = mgr.emp_id
-... WHERE e.salary > mgr.salary;
 ---
 
 ## Puzzle 7: Outer Join (Medium)
@@ -157,16 +119,6 @@ DONE:
 
 **Expected Output:** A table showing each employee's name and their manager's name. Employees without managers (like Eve) should still appear, perhaps with a NULL value for the manager's name.
 
-DONE:
-... SELECT
-... e.name as employee_name,
-... mgr.name as manager_name
-... FROM employees e
-... LEFT JOIN managers m
-... ON e.emp_id = m.emp_id
-... LEFT JOIN employees mgr
-... ON m.manager_id = mgr.emp_id;
-
 ---
 
 ## Puzzle 8: Conditional Aggregation (Medium)
@@ -178,12 +130,6 @@ DONE:
 **Hint:** Think about how you can use functions like `COUNT` or `SUM` along with a condition (like an `IF` or `CASE` statement) inside the aggregation.
 
 **Expected Output:** A table showing two counts, one for 'Engineering' employees and one for 'Other Departments'. (e.g., Engineering: 3, Other: 4)
-
-DONE:
-... SELECT
-... COUNT(CASE WHEN department = 'Engineering' THEN 1 END) AS Engineering,
-... COUNT(CASE WHEN department != 'Engineering' THEN 1 END) AS Other
-... FROM employees;
 
 ---
 
@@ -202,11 +148,6 @@ employees['hire_date'] = ['2022-05-10', '2023-01-15', '2023-08-20', '2022-11-01'
 
 **Expected Output:** A table listing the names of employees hired in 2023 (Bob, Charlie, Frank).
 
-DONE:
-... SELECT name, strftime('%Y', hire_date) AS year
-... FROM employees
-... WHERE year = '2023';
-
 ---
 
 ## Puzzle 10: String Matching (Easy)
@@ -218,11 +159,6 @@ DONE:
 **Hint:** Look for SQL operators specifically designed for pattern matching in strings.
 
 **Expected Output:** A table listing the employee(s) whose name starts with 'A' (Alice).
-
-DONE:
-... SELECT name
-... FROM employees
-... WHERE substr(name, 1, 1) = 'A';
 
 ---
 
@@ -248,16 +184,6 @@ assignments['proj_id'] = ['P1', 'P1', 'P2', 'P3', 'P4', 'P3']
 
 **Expected Output:** A table listing the project names associated with 'Engineering' employees (Bob, Charlie, Grace). Expected projects: Website Redesign, Database Migration, Security Audit.
 
-DONE:
-... SELECT
-... e.name, p.proj_name
-... FROM employees e
-... JOIN assignments a
-... ON a.emp_id = e.emp_id
-... JOIN projects p
-... ON a.proj_id = p.proj_id
-... WHERE e.department = 'Engineering';
-
 ---
 
 ## Puzzle 12: Finding Duplicates (Medium)
@@ -270,10 +196,6 @@ DONE:
 
 **Expected Output:** A table listing salary values that appear more than once. (In the sample data, no salary is duplicated, but the query should work if there were duplicates). If Alice also made 80000, the output should show 80000.
 
-DONE:
-... SELECT salary, COUNT(salary)
-... from employees
-... GROUP BY salary;
 ---
 
 ## Puzzle 13: Nth Highest Value (Hard)
@@ -286,18 +208,6 @@ DONE:
 
 **Expected Output:** A table showing the name and salary of the 3rd highest paid employee (Bob, 80000).
 
-DONE:
-... SELECT name, salary
-... FROM employees
-... ORDER BY salary DESC
-... LIMIT 1 OFFSET 2;
-
-... with ranked as (
-... select name, salary, RANK() OVER (ORDER BY salary DESC) as sal_rank
-... from employees)
-... select name, salary
-... from ranked
-... where sal_rank = 3;
 ---
 
 ## Puzzle 14: Pivot Data (Hard)
