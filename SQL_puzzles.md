@@ -336,3 +336,244 @@ DONE:
 
 ---
 
+## Puzzle 17: Feature Engineering - Binning (Medium)
+
+**Task:** Categorize customers into 'Low', 'Medium', or 'High' spenders based on their total purchase amount. Thresholds: Low < 100, Medium < 500, High >= 500.
+
+**Setup Code (Run in CLI):**
+
+```python
+/create customers
+customers['customer_id'] = [1, 2, 3, 4, 5, 6]
+customers['name'] = ['Liam', 'Olivia', 'Noah', 'Emma', 'Oliver', 'Ava']
+
+/create purchases
+purchases['purchase_id'] = [101, 102, 103, 104, 105, 106, 107, 108]
+purchases['customer_id'] = [1, 2, 1, 3, 4, 2, 5, 6]
+purchases['amount'] = [50.0, 120.0, 30.0, 450.0, 600.0, 80.0, 25.0, 700.0]
+```
+
+**Hint:** You'll need to aggregate purchase amounts per customer first. Then, use a `CASE` statement to apply the category labels based on the total amount.
+
+**Expected Output:** A table showing each customer's ID, name, total purchase amount, and their spending category ('Low', 'Medium', or 'High').
+
+---
+
+## Puzzle 18: Feature Engineering - Lag Features (Hard)
+
+**Task:** For each product on each date, find the sales amount from the *previous* day. Assume dates are consecutive where data exists.
+
+**Setup Code (Run in CLI):**
+
+```python
+/create daily_sales
+daily_sales['sale_date'] = ['2023-01-01', '2023-01-02', '2023-01-03', '2023-01-01', '2023-01-02', '2023-01-03']
+daily_sales['product_id'] = [10, 10, 10, 20, 20, 20]
+daily_sales['sales_amount'] = [100, 110, 105, 50, 55, 60]
+# Convert date string to actual date type if needed by the specific SQL environment
+# In sqlite-web or similar, date strings might work directly for comparisons
+# If not, you might need: daily_sales['sale_date'] = pd.to_datetime(daily_sales['sale_date']) # before loading
+```
+
+**Hint:** Window functions like `LAG()` are ideal for this. You need to partition by the product and order by date to look back correctly. Handle the first day for each product where there's no previous day.
+
+**Expected Output:** A table showing sale date, product ID, sales amount, and the previous day's sales amount (or NULL/0 for the first day).
+
+---
+
+## Puzzle 19: Data Cleaning - Identifying Missing Values (Easy)
+
+**Task:** Find all rows in the `sensor_readings` table where the `temperature` reading is missing (NULL).
+
+**Setup Code (Run in CLI):**
+
+```python
+/create sensor_readings
+sensor_readings['reading_id'] = [1, 2, 3, 4, 5, 6]
+sensor_readings['sensor_id'] = ['A', 'B', 'A', 'C', 'B', 'A']
+sensor_readings['timestamp'] = ['2023-05-01 10:00', '2023-05-01 10:00', '2023-05-01 10:05', '2023-05-01 10:00', '2023-05-01 10:05', '2023-05-01 10:10']
+sensor_readings['temperature'] = [25.5, 22.0, None, 30.1, None, 26.0] # Using Python's None for NULL
+sensor_readings['humidity'] = [60, 65, 62, 55, 68, 61]
+```
+
+**Hint:** SQL has a specific operator to check if a value `IS NULL`.
+
+**Expected Output:** A table showing the full rows (all columns) for readings where the temperature is NULL (reading_ids 3 and 5).
+
+---
+
+## Puzzle 20: Data Sampling (Medium)
+
+**Task:** Select approximately 50% of the user sessions randomly from the `user_sessions` table.
+
+**Setup Code (Run in CLI):**
+
+```python
+/create user_sessions
+user_sessions['session_id'] = range(1, 21) # 20 sessions
+user_sessions['user_id'] = [ (i % 5) + 1 for i in range(20)] # Users 1-5
+user_sessions['duration_seconds'] = [ (i * 10) + 30 for i in range(20)]
+```
+
+**Hint:** Most SQL dialects have a function to generate random numbers (e.g., `RANDOM()` or `RAND()`). You can use this in an `ORDER BY` clause and `LIMIT` the result, or use it in a `WHERE` clause to filter rows probabilistically. The exact method might vary slightly based on the SQL flavor (SQLite's `RANDOM()` is common).
+
+**Expected Output:** A table containing roughly half (around 10 rows) of the original `user_sessions` table, selected randomly. The exact rows will vary on each execution.
+
+---
+
+## Puzzle 21: A/B Testing Analysis - Basic Comparison (Medium)
+
+**Task:** Calculate the conversion rate (percentage of users who made a purchase) for users in the 'Control' group versus the 'Treatment' group.
+
+**Setup Code (Run in CLI):**
+
+```python
+/create experiment_users
+experiment_users['user_id'] = range(1, 11) # 10 users
+experiment_users['group_name'] = ['Control'] * 5 + ['Treatment'] * 5
+
+/create user_actions
+user_actions['action_id'] = range(101, 116) # 15 actions
+user_actions['user_id'] = [1, 2, 6, 3, 7, 8, 1, 4, 9, 6, 2, 10, 5, 7, 3] # Some users repeat actions
+user_actions['action_type'] = ['view', 'view', 'view', 'click', 'view', 'purchase', 'click', 'view', 'purchase', 'click', 'purchase', 'view', 'view', 'purchase', 'purchase']
+```
+
+**Hint:** First, identify which users made a purchase. Then, join this information with the experiment group assignments. Finally, aggregate counts per group (total users, converted users) and calculate the rate (converted / total * 100.0). Use `COUNT(DISTINCT user_id)` carefully.
+
+**Expected Output:** A table showing two rows, one for 'Control' and one for 'Treatment', with their respective conversion rates. (Control: User 3 & 5 purchased? / 5 users. Treatment: User 6, 7, 8, 9 purchased? / 5 users).
+
+---
+
+## Puzzle 22: Time Series Analysis - Simple Moving Average (Hard)
+
+**Task:** Calculate the 3-day moving average of website `visits` for the entire site.
+
+**Setup Code (Run in CLI):**
+
+```python
+/create website_traffic
+website_traffic['log_date'] = ['2023-03-01', '2023-03-02', '2023-03-03', '2023-03-04', '2023-03-05', '2023-03-06', '2023-03-07']
+website_traffic['visits'] = [1000, 1100, 1050, 1200, 1150, 1300, 1250]
+# Ensure log_date is treated as a date for ordering
+```
+
+**Hint:** This is a classic use case for window functions. You need `AVG(visits)` over a window defined by `ORDER BY log_date` that includes the current row and the 2 preceding rows (`ROWS BETWEEN 2 PRECEDING AND CURRENT ROW`).
+
+**Expected Output:** A table showing each date and the corresponding 3-day moving average of visits. The first two days will have averages based on fewer than 3 days.
+
+---
+
+## Puzzle 23: User Segmentation - RFM Prep (Medium/Hard)
+
+**Task:** For each customer, calculate their total number of purchases (Frequency) and the total amount spent (Monetary Value). (Recency is harder without transaction dates, so we skip it here).
+
+**Setup Code:** (Use `customers` and `purchases` tables from Puzzle 11)
+
+**Hint:** You need to `GROUP BY` customer and use two different aggregate functions: `COUNT()` for frequency and `SUM()` for monetary value. Join with the `customers` table to get names.
+
+**Expected Output:** A table showing `customer_id`, `name`, `Frequency` (count of purchases), and `Monetary` (sum of purchase amounts) for each customer.
+
+---
+
+## Puzzle 24: Anomaly Detection - Simple Thresholding (Medium)
+
+**Task:** Identify users whose average session duration is more than 1.5 times the overall average session duration across all users.
+
+**Setup Code:** (Use `user_sessions` table from Puzzle 14)
+
+**Hint:** First, calculate the overall average duration. Then, calculate the average duration per user. Finally, select users whose average duration exceeds the overall average multiplied by 1.5. Subqueries or CTEs (Common Table Expressions) are helpful here.
+
+**Expected Output:** A table listing the `user_id` and their average session duration for users identified as having anomalously long average sessions.
+
+---
+
+## Puzzle 25: Data Transformation - Finding Min/Max for Scaling (Easy)
+
+**Task:** Find the minimum and maximum values for the `feature1` column in the `ml_data` table. This is often needed for Min-Max scaling: `(value - min) / (max - min)`.
+
+**Setup Code (Run in CLI):**
+
+```python
+/create ml_data
+ml_data['id'] = range(1, 8)
+ml_data['feature1'] = [10.5, 12.1, 8.3, 15.0, 9.9, 11.2, 14.5]
+ml_data['feature2'] = [100, 110, 95, 120, 105, 108, 115]
+ml_data['label'] = [0, 1, 0, 1, 0, 1, 1]
+```
+
+**Hint:** Use the `MIN()` and `MAX()` aggregate functions. You don't need a `GROUP BY` if you want the overall min/max across the whole table.
+
+**Expected Output:** A single row table showing the minimum and maximum values found in `feature1`. (Min: 8.3, Max: 15.0).
+
+---
+
+## Puzzle 26: Model Evaluation Prep - Confusion Matrix Counts (Hard)
+
+**Task:** Given a table of actual labels and predicted labels, count the number of True Positives (TP), False Positives (FP), True Negatives (TN), and False Negatives (FN). Assume '1' is the positive class and '0' is the negative class.
+
+**Setup Code (Run in CLI):**
+
+```python
+/create predictions
+predictions['id'] = range(1, 11) # 10 predictions
+predictions['actual_label'] = [1, 0, 1, 1, 0, 0, 1, 0, 1, 0]
+predictions['predicted_label'] = [1, 1, 0, 1, 0, 1, 1, 0, 0, 0]
+```
+
+**Hint:** This requires conditional aggregation. Use `SUM()` with `CASE` statements for each of the four conditions:
+*   TP: actual = 1 AND predicted = 1
+*   FP: actual = 0 AND predicted = 1
+*   TN: actual = 0 AND predicted = 0
+*   FN: actual = 1 AND predicted = 0
+
+**Expected Output:** A single row table with four columns: TP, FP, TN, FN, showing the counts for each category based on the provided data.
+
+---
+
+## Puzzle 27: Handling Missing Values - Imputation (Medium)
+
+**Task:** Replace missing `temperature` values in the `sensor_readings` table with the average temperature for the same sensor on the same day.
+
+**Setup Code:** (Use `sensor_readings` table from Puzzle 19)
+
+**Hint:** You'll need to calculate the average temperature per sensor per day first. Then, use this in an `UPDATE` statement or a `SELECT` with `COALESCE()` to replace missing values.
+
+**Expected Output:** The modified `sensor_readings` table with missing `temperature` values replaced.
+
+---
+
+## Puzzle 28: Data Quality Check - Duplicate Rows (Easy)
+
+**Task:** Identify and count duplicate rows in the `user_sessions` table.
+
+**Setup Code:** (Use `user_sessions` table from Puzzle 14)
+
+**Hint:** Use `COUNT(*)` with `GROUP BY` on all columns. Then, filter for groups with more than one row.
+
+**Expected Output:** A table showing the duplicate rows and their counts.
+
+---
+
+## Puzzle 29: Data Normalization - Scaling (Medium)
+
+**Task:** Scale the `feature1` and `feature2` columns in the `ml_data` table using Min-Max scaling.
+
+**Setup Code:** (Use `ml_data` table from Puzzle 25)
+
+**Hint:** Calculate the minimum and maximum for each feature. Then, apply the Min-Max scaling formula: `(value - min) / (max - min)`.
+
+**Expected Output:** The `ml_data` table with `feature1` and `feature2` scaled between 0 and 1.
+
+---
+
+## Puzzle 30: Data Visualization Prep - Aggregating for Plotting (Medium)
+
+**Task:** Prepare data for plotting the distribution of `feature1` values in the `ml_data` table by aggregating into bins.
+
+**Setup Code:** (Use `ml_data` table from Puzzle 25)
+
+**Hint:** Decide on a bin size, then use `GROUP BY` with a `CASE` statement to assign each value to a bin. Count the number of values in each bin.
+
+**Expected Output:** A table showing the bins and their respective counts, ready for plotting.
+
+---
