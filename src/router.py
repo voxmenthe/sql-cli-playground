@@ -1,0 +1,106 @@
+"""
+Classifier that decides whether a user line is:
+  * /meta command
+  * Python statement
+  * SQL block (ends with ;)
+Very small on purpose – keeps cli.py readable.
+"""
+
+from __future__ import annotations
+import re
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+from pathlib import Path
+
+if TYPE_CHECKING:
+    from .manager import TableManager
+
+META_PATTERN = re.compile(r"^/\w+")
+
+
+@dataclass
+class MetaCommand:
+    raw: str
+
+    def execute(self, mgr: "TableManager"):              # noqa: F821
+        parts = self.raw.strip().split()
+        cmd, *args = parts
+        match cmd:
+            case "/create":
+                if not args:
+                    raise ValueError("Usage: /create <table>")
+                mgr.create(args[0])
+            case "/load":
+                if len(args) != 1:
+                    raise ValueError("Usage: /load <table>")
+                table_name = args[0]
+                mgr.load(table_name)
+                return f"Table '{table_name}' loaded."
+            case "/list":
+                return mgr.list()
+            case "/save":
+                if len(args) < 1:
+                    raise ValueError("Usage: /save <table> [file.pkl]")
+                name, *file = args
+                filename = file[0] if file else f"{name}.pkl"
+                if not filename.endswith(".pkl"):
+                    filename = f"{Path(filename).stem}.pkl"
+                mgr.save(name, filename)
+                return f"Table '{name}' saved to {filename}"
+            case "/export":
+                if len(args) < 1:
+                    raise ValueError("Usage: /export <table> [file.csv]")
+                name, *file = args
+                filename = file[0] if file else f"{name}.csv"
+                if not filename.endswith(".csv"):
+                     filename = f"{Path(filename).stem}.csv"
+                mgr.export(name, filename)
+                return f"Table '{name}' exported to {filename}"
+            case "/schema":
+                if not args:
+                     raise ValueError("Usage: /schema <table>")
+                return mgr.schema(args[0])
+            case "/help":
+                return (
+                    "Meta Commands:\n"
+                    "  /create <tbl>         : Create a new empty table\n"
+                    "  /load <tbl>           : Load table <tbl> from auto-save directory\n"
+                    "  /save <tbl> [f.pkl]   : Save table to .pkl file (default: <tbl>.pkl)\n"
+                    "  /export <tbl> [f.csv] : Export table to .csv file (default: <tbl>.csv)\n"
+                    "  /list                 : List current tables\n"
+                    "  /schema <tbl>         : Show table schema (columns and types)\n"
+                    "  /help                 : Show this help message\n"
+                    "  /exit                 : Quit the playground\n\n"
+                    "Enter Python code directly, or end with ';' for SQL."
+                 )
+            case "/exit":
+                raise SystemExit
+            case _:
+                raise ValueError(f"Unknown meta command {cmd}")
+
+
+@dataclass
+class SqlBlock:
+    sql: str
+
+
+@dataclass
+class PythonStmt:
+    code: str
+
+
+def classify(text: str) -> MetaCommand | SqlBlock | PythonStmt:
+    stripped_text = text.strip()
+    if not stripped_text:
+        return PythonStmt("")     # no-op
+
+    # Treat as MetaCommand only if it starts with / and contains no newlines
+    if META_PATTERN.match(stripped_text) and '\n' not in stripped_text:
+        return MetaCommand(stripped_text)
+
+    # Treat as SQL if the stripped text ends with ;
+    if stripped_text.endswith(";"):
+        return SqlBlock(stripped_text) # Use stripped text for SQL check
+
+    # Otherwise, it's Python. Use the original text for exec().
+    return PythonStmt(text) 
