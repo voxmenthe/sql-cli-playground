@@ -110,10 +110,16 @@ SELECT col1, col2 FROM table1 LIMIT 3;                            # Run SQL quer
 
 | Command | Description |
 |---------|-------------|
-| `/create tablename` | Create a new table |
-| `/schema tablename` | View table schema |
-| `_` | Access the last SQL query result |
+| `/create <tbl>` | Create a new empty table |
+| `/load <tbl> [<tbl>...]` | Load table(s) from auto-save directory |
+| `/clear <tbl> [<tbl>...]` | Remove table(s) from memory and database |
+| `/save <tbl> [file.pkl]` | Save table to .pkl file (default: `<tbl>.pkl`) |
+| `/export <tbl> [file.csv]` | Export table to .csv file (default: `<tbl>.csv`) |
+| `/list` | List current tables |
+| `/schema <tbl>` | View table schema |
+| `/help` | Show this help message |
 | `/exit` or `/quit` | Exit the CLI |
+| `_` | Access the last SQL query result |
 | Any valid SQL | Execute SQL query |
 | Any valid Python | Execute Python code to manipulate tables |
 
