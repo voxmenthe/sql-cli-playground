@@ -31,11 +31,15 @@ class MetaCommand:
                     raise ValueError("Usage: /create <table>")
                 mgr.create(args[0])
             case "/load":
-                if len(args) != 1:
-                    raise ValueError("Usage: /load <table>")
-                table_name = args[0]
-                mgr.load(table_name)
-                return f"Table '{table_name}' loaded."
+                if not args:
+                    raise ValueError("Usage: /load <table> [<table2> ...]")
+                loaded = []
+                for table_name in args:
+                    mgr.load(table_name)
+                    loaded.append(table_name)
+                if len(loaded) == 1:
+                    return f"Table '{loaded[0]}' loaded."
+                return f'Loaded tables: {", ".join(loaded)}.'
             case "/list":
                 return mgr.list()
             case "/save":

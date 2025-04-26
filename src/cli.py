@@ -59,30 +59,6 @@ def main() -> None:
     conn = sqlite3.connect(":memory:", check_same_thread=False)
     tables = TableManager(conn, TEMP_TABLE_DIR)
 
-    # --- Load tables from TEMP_TABLE_DIR on startup ---
-    if TEMP_TABLE_DIR.exists() and TEMP_TABLE_DIR.is_dir():
-        console.print(f"[grey50]Loading tables from {TEMP_TABLE_DIR}...[/]")
-        loaded_count = 0
-        try:
-            for filepath in TEMP_TABLE_DIR.glob("*.pkl"):
-                table_name = filepath.stem
-                if table_name.isidentifier():
-                    try:
-                        tables.load(table_name)
-                        loaded_count += 1
-                        # print(f"DEBUG: Loaded {table_name}") # Optional
-                    except Exception as e:
-                        console.print(f"[yellow]Warning: Failed to load table '{table_name}': {e}[/]")
-                else:
-                    console.print(f"[yellow]Warning: Skipping file {filepath.name}, invalid table name '{table_name}'.[/]")
-            if loaded_count > 0:
-                 console.print(f"[grey50]Loaded {loaded_count} table(s).[/]")
-            else:
-                 console.print(f"[grey50]No tables found to load.[/]")
-        except Exception as e:
-            console.print(f"[red]Error scanning temp directory {TEMP_TABLE_DIR}: {e}[/]")
-    # -----------------------------------------------------
-
     # --- Add custom key bindings ---
     kb = KeyBindings()
     # Use Meta+Enter (Esc -> Enter or Alt+Enter)

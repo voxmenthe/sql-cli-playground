@@ -104,6 +104,20 @@ class TableManager:
     def list(self) -> List[str]:
         return sorted(list(self.tables))
 
+    def clear(self, name: str) -> None:
+        """Remove a table from the manager and drop it from the database."""
+        if name not in self.tables:
+            raise ValueError(f"Table '{name}' not found.")
+        # Remove from in-memory dict
+        del self.tables[name]
+        # Drop table in SQLite
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(f"DROP TABLE IF EXISTS {name}")
+            self.conn.commit()
+        except Exception as e:
+            raise sqlite3.Error(f"Failed to drop table '{name}': {e}")
+
     # ---------- sync helpers -----------------------------------------------
     def _push(self, name: str) -> None:
         if name not in self.tables:
