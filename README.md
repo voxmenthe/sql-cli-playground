@@ -103,7 +103,7 @@ SELECT col1, col2 FROM table1 LIMIT 3;                            # Run SQL quer
 │ 0   │ col1  │ INTEGER │ 0       │ <NA>       │ 0  │
 │ 1   │ col2  │ REAL    │ 0       │ <NA>       │ 0  │
 └─────┴───────┴─────────┴─────────┴────────┴─────────┘
-(tables: ['table1']) >> /exit                                     # Exit the CLI
+(tables: ['table1']) >> /exit     # Exit the CLI - by default saves all the currently active tables to /src/TEMP_TABLES
 ```
 
 ## Commands 🛠️
@@ -114,6 +114,7 @@ SELECT col1, col2 FROM table1 LIMIT 3;                            # Run SQL quer
 | `/load <tbl> [<tbl>...]` | Load table(s) from auto-save directory |
 | `/clear <tbl> [<tbl>...]` | Remove table(s) from memory and database |
 | `/save <tbl> [file.pkl]` | Save table to .pkl file (default: `<tbl>.pkl`) |
+| `/save_all` | Save all current tables to default directory (this happens on exit as well) |
 | `/export <tbl> [file.csv]` | Export table to .csv file (default: `<tbl>.csv`) |
 | `/list` | List current tables |
 | `/schema <tbl>` | View table schema |

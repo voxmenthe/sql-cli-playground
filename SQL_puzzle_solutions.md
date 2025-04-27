@@ -278,3 +278,43 @@ FROM D
 LEFT JOIN C ON D.id = C.id
 WHERE C.id IS NULL;
 ```
+
+## Puzzle 53: Differences between tables (Easy)
+
+
+## Puzzle 54: Imputation
+
+```sql
+WITH ai AS (
+  SELECT education, AVG(income) AS avg_income
+  FROM imputation_table
+  GROUP BY education
+)
+SELECT t.id, t.education,
+COALESCE(t.income, ai.avg_income) AS imputed_income
+FROM imputation_table t
+LEFT JOIN ai
+ON t.education = ai.education;
+```
+
+```sql
+SELECT
+  id,
+  education,
+  COALESCE(income,
+    AVG(income) OVER (PARTITION BY education)
+  ) AS imputed_income
+FROM imputation_table;
+```
+
+OR to add a fallback imputed value using the global average:
+```sql
+SELECT
+  id,
+  education,
+  COALESCE(income,
+    AVG(income) OVER (PARTITION BY education),
+    AVG(income) OVER () -- global average
+  ) AS imputed_income
+FROM imputation_table;
+```

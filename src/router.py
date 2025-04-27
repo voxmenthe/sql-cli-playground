@@ -61,6 +61,9 @@ class MetaCommand:
                     filename = f"{Path(filename).stem}.pkl"
                 mgr.save(name, filename)
                 return f"Table '{name}' saved to {filename}"
+            case "/save_all":
+                mgr.save_all_to_temp(mgr.temp_dir)
+                return f"Saved {len(mgr.tables)} table(s) to {mgr.temp_dir}"
             case "/export":
                 if len(args) < 1:
                     raise ValueError("Usage: /export <table> [file.csv]")
@@ -81,6 +84,7 @@ class MetaCommand:
                     "  /load <tbl> [<tbl>...] : Load table(s) from auto-save directory\n"
                     "  /clear <tbl> [<tbl>...] : Remove table(s) from memory and database\n"
                     "  /save <tbl> [f.pkl]   : Save table to .pkl file (default: <tbl>.pkl)\n"
+                    "  /save_all             : Save all current tables to default directory\n"
                     "  /export <tbl> [f.csv] : Export table to .csv file (default: <tbl>.csv)\n"
                     "  /list                 : List current tables\n"
                     "  /schema <tbl>         : Show table schema (columns and types)\n"
