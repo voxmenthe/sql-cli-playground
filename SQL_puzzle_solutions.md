@@ -122,3 +122,159 @@ ORDER BY salary DESC
 LIMIT 1 OFFSET 2;
 ```
 
+## Puzzle 14: Pivot Data (Hard)
+```sql
+SELECT
+  SUM(CASE WHEN department = 'HR' THEN salary ELSE 0 END) AS HR_Total,
+  SUM(CASE WHEN department = 'Engineering' THEN salary ELSE 0 END) AS Engineering_Total,
+  SUM(CASE WHEN department = 'Sales' THEN salary ELSE 0 END) AS Sales_Total
+FROM employees;
+```
+
+## Puzzle 15: Set Operations (Easy)
+```sql
+SELECT name
+FROM employees
+WHERE department = 'HR'
+UNION
+SELECT name
+FROM employees
+WHERE department = 'Sales';
+```
+
+## Puzzle 16: Correlated Subquery (Hard)
+```sql
+SELECT e.name, e.department, e.salary,
+       (SELECT AVG(salary) FROM employees WHERE department = e.department) AS avg_dept_salary
+FROM employees e;
+```
+
+```sql
+... WITH davg AS (
+... SELECT department, AVG(salary) AS dept_avg
+FROM employees
+GROUP BY department)
+SELECT e.name, e.department, e.salary, dept_avg
+FROM employees e
+LEFT JOIN davg
+ON e.department = davg.department;
+```
+
+## Puzzle 17: Feature Engineering - Binning (Medium)
+
+
+```sql
+SELECT c.customer_id, c.name,
+       SUM(p.amount) AS total_purchases,
+       CASE
+         WHEN SUM(p.amount) < 100 THEN 'Low'
+         WHEN SUM(p.amount) < 500 THEN 'Medium'
+         ELSE 'High'
+       END AS spending_category
+FROM customers c
+LEFT JOIN purchases p ON c.customer_id = p.customer_id
+GROUP BY c.customer_id, c.name;
+```
+
+```sql
+WITH spend AS (
+  SELECT customer_id, SUM(amount) AS amtsum
+  FROM purchases
+  GROUP BY customer_id
+)
+
+SELECT c.customer_id, c.name, spend.amtsum,
+(CASE 
+ WHEN spend.amtsum < 100 THEN 'Low'
+ WHEN spend.amtsum < 500 THEN 'Medium'
+ ELSE 'High'
+ END) AS category
+FROM customers c
+JOIN spend ON c.customer_id = spend.customer_id;
+```
+
+```sql
+WITH spend AS (
+  SELECT customer_id, SUM(amount) AS amtsum
+  FROM purchases
+  GROUP BY customer_id
+)
+SELECT c.customer_id, c.name, spend.amtsum,
+(CASE 
+  WHEN spend.amtsum < 100 THEN 'Low'
+  WHEN spend.amtsum < 500 THEN 'Medium'
+  ELSE 'High'
+END) AS category
+FROM customers c
+JOIN spend
+ON c.customer_id = spend.customer_id;
+```
+
+## Puzzle 18: Window Functions (Hard)
+
+```sql
+SELECT 
+  sale_date,
+  product_id,
+  sales_amount,
+  LAG(sales_amount) OVER (PARTITION BY product_id ORDER BY sale_date) AS prev_day_sales
+FROM daily_sales;
+```
+
+## Puzzle 51: Get counts of unique values for each column (Easy)
+
+# rubric only - not working code:
+```sql
+SELECT column_name, COUNT(DISTINCT column_value) AS unique_count
+FROM employees
+
+GROUP BY column_name;
+```
+
+```sql
+SELECT
+  col_name,
+  COUNT(DISTINCT col_value) AS uniq_count
+FROM (
+  SELECT
+    'name'       AS col_name,
+    name         AS col_value
+  FROM employees
+
+  UNION ALL
+
+  SELECT
+    'department' AS col_name,
+    department   AS col_value
+  FROM employees
+
+  UNION ALL
+
+  SELECT
+    'salary' AS col_name,
+    salary   AS col_value
+  FROM employees  
+) t
+GROUP BY col_name;
+```
+
+## Puzzle 52: Given a table with columns a, b, and c, find the number of non-null values in each column
+
+```sql
+SELECT COUNT(sensor_id), COUNT(temperature), COUNT(humidity)
+FROM sensor_readings;
+```
+
+## Puzzle 53: Differences between tables (Easy)
+
+```sql
+SELECT COUNT(*) AS count_only_in_C
+FROM C
+LEFT JOIN D ON C.id = D.id
+WHERE D.id IS NULL;
+
+SELECT COUNT(*) AS count_only_in_D
+FROM D
+LEFT JOIN C ON D.id = C.id
+WHERE C.id IS NULL;
+```

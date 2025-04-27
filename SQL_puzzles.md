@@ -487,3 +487,281 @@ predictions['predicted_label'] = [1, 1, 0, 1, 0, 1, 1, 0, 0, 0]
 **Expected Output:** A table showing the bins and their respective counts, ready for plotting.
 
 ---
+
+## Puzzle 31: Sales Rep Ranking (Medium)
+
+**Task:** Using the `sales` table from Puzzle 12, rank each sales representative by their total sales amount, showing the `rep_id`, `total_sales`, and assign a `sales_rank`.
+
+**Setup Code:** (Use `sales` table from Puzzle 12)
+
+**Hint:** Use `SUM(amount) OVER (PARTITION BY rep_id)` to compute totals and `DENSE_RANK() OVER (ORDER BY total_sales DESC)` to assign ranks.
+
+**Expected Output:** A table with columns `rep_id`, `total_sales`, and `sales_rank`.
+
+---
+## Puzzle 32: Cumulative Monthly Revenue (Medium)
+
+**Task:** Calculate cumulative revenue month over month using the `sales` table from Puzzle 12. Include `month`, `revenue`, and `cumulative_revenue`.
+
+**Setup Code:** (Use `sales` table from Puzzle 12)
+
+**Hint:** Use `SUM(amount) OVER (ORDER BY month ROWS UNBOUNDED PRECEDING)`.
+
+**Expected Output:** A table sorted by `month` showing `cumulative_revenue`.
+
+---
+## Puzzle 33: Top N Employees by Department (Medium)
+
+**Task:** Find the top 2 highest paid employees in each department using the `employees` table from Puzzle 5. Return `department`, `employee_name`, and `salary`.
+
+**Setup Code:** (Use `employees` table from Puzzle 5)
+
+**Hint:** Use `ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC)` and filter on `row_num <= 2`.
+
+**Expected Output:** The top 2 earners per department.
+
+---
+## Puzzle 34: Employee-Manager Self-Join (Easy)
+
+**Task:** List each employee along with their manager’s name using the `employees` table from Puzzle 5.
+
+**Setup Code:** (Use `employees` table from Puzzle 5)
+
+**Hint:** Perform a self-join on `employees` matching `manager_id` to `employee_id`.
+
+**Expected Output:** Columns `employee_id`, `employee_name`, and `manager_name`.
+
+---
+## Puzzle 35: Organizational Hierarchy (Hard)
+
+**Task:** Show the full management chain for each employee using the `employees` table from Puzzle 5.
+
+**Setup Code:** (Use `employees` table from Puzzle 5)
+
+**Hint:** Use a `WITH RECURSIVE` CTE to traverse the hierarchy.
+
+**Expected Output:** A table listing `employee_id`, `employee_name`, and the full path of managers above them.
+
+---
+## Puzzle 36: Customers Without Purchases (Easy)
+
+**Task:** Identify customers who have never made a purchase from the `customers` and `purchases` tables used in Puzzle 9.
+
+**Setup Code:** (Use `customers` and `purchases` tables from Puzzle 9)
+
+**Hint:** Use `LEFT JOIN` or `EXCEPT` to find customers with no matching purchases.
+
+**Expected Output:** A list of customer IDs or names with no purchases.
+
+---
+## Puzzle 37: Common Products (Easy)
+
+**Task:** Find products that appear in both the `sales` table (from Puzzle 12) and a `returns` table you create.
+
+**Setup Code:** (Assume or create a `returns` table with columns `return_id`, `product_id`, and `quantity`.)
+
+**Hint:** Use `INTERSECT` to find shared `product_id`s.
+
+**Expected Output:** A list of `product_id`s present in both tables.
+
+---
+## Puzzle 38: Monthly Sales Pivot (Medium)
+
+**Task:** Pivot the `sales` table from Puzzle 12 so months become columns and rows show `product_id` with total sales per month.
+
+**Setup Code:** (Use `sales` table from Puzzle 12)
+
+**Hint:** Use `CASE` expressions with `SUM()` and `GROUP BY`, or a `PIVOT` clause if supported.
+
+**Expected Output:** A pivoted table with `product_id` and monthly sales columns.
+
+---
+## Puzzle 39: Survey Data Unpivot (Medium)
+
+**Task:** Unpivot a `survey` table with columns `response_id`, `q1`, `q2`, and `q3` into a tall format.
+
+**Setup Code:** (Create `survey` table with sample answers for `q1`, `q2`, and `q3`.)
+
+**Hint:** Use `UNION ALL` or the `UNPIVOT` operator.
+
+**Expected Output:** Columns `response_id`, `question`, and `answer`.
+
+---
+## Puzzle 40: JSON Data Extraction (Medium)
+
+**Task:** Extract nested values from a JSON column in a `json_data` table, e.g., get `user.id` and `order.total`.
+
+**Setup Code:** (Create `json_data` table with a `data` JSON column.)
+
+**Hint:** Use `JSON_EXTRACT()`, `->>`, or equivalent functions.
+
+**Expected Output:** A table with `user_id` and `order_total`.
+
+---
+## Puzzle 41: Full-Text Search (Medium)
+
+**Task:** Find articles containing the keyword “database” in an `articles` table.
+
+**Setup Code:** (Create `articles` table with `article_id` and `content`.)
+
+**Hint:** Use `LIKE '%database%'` or full-text search functions if available.
+
+**Expected Output:** Rows of `article_id` and a snippet of `content`.
+
+---
+## Puzzle 42: Moving Average Excluding Current Row (Hard)
+
+**Task:** Calculate a 3-point moving average in a `measurements` table, excluding the current row.
+
+**Setup Code:** (Use `measurements` table from Puzzle 7.)
+
+**Hint:** Define window frame with `ROWS BETWEEN 3 PRECEDING AND 1 PRECEDING`.
+
+**Expected Output:** Columns `reading_id`, `value`, and `moving_avg`.
+
+---
+## Puzzle 43: Top Percentile Employees (Medium)
+
+**Task:** Identify employees in the top 10% salary bracket from the `employees` table in Puzzle 5.
+
+**Setup Code:** (Use `employees` table from Puzzle 5.)
+
+**Hint:** Use `CUME_DIST()` or `PERCENT_RANK()`.
+
+**Expected Output:** A list of `employee_id` and `salary` for the top 10%.
+
+---
+## Puzzle 44: Conditional Aggregation by Status (Easy)
+
+**Task:** Count the number of orders in each `status` category from the `orders` table in Puzzle 11.
+
+**Setup Code:** (Use `orders` table from Puzzle 11.)
+
+**Hint:** Use `SUM(CASE WHEN status = '...' THEN 1 ELSE 0 END)` grouped by `status`.
+
+**Expected Output:** Counts for each status value.
+
+---
+## Puzzle 45: Latest Order Per Customer (Hard)
+
+**Task:** For each customer, show their most recent order using `customers` (Puzzle 9) and `orders` (Puzzle 11).
+
+**Setup Code:** (Use `customers` and `orders` tables.)
+
+**Hint:** Use a lateral join or subquery with `MAX(order_date)`.
+
+**Expected Output:** Columns `customer_id`, `customer_name`, and latest `order_id`.
+
+---
+## Puzzle 46: Geospatial Distance Filter (Hard)
+
+**Task:** Given a `locations` table with `lat` and `lon`, find points within 10 km of a reference point.
+
+**Setup Code:** (Create `locations` table with sample latitude/longitude.)
+
+**Hint:** Use the Haversine formula or spatial functions if supported.
+
+**Expected Output:** Rows of locations within the radius.
+
+---
+## Puzzle 47: Inactive Customers (Easy)
+
+**Task:** Find customers who have not logged in for over 30 days using a `last_login` column in `customers`.
+
+**Setup Code:** (Use `customers` table with `last_login` date.)
+
+**Hint:** Use date functions like `CURRENT_DATE - last_login > 30`.
+
+**Expected Output:** List of `customer_id` and `last_login` older than 30 days.
+
+---
+## Puzzle 48: Data Masking (Medium)
+
+**Task:** Mask the middle digits of a Social Security number in a `users` table, showing only the first and last two digits.
+
+**Setup Code:** (Create `users` table with `user_id` and `ssn`.)
+
+**Hint:** Use `SUBSTR()`, `CONCAT()` or equivalent string functions.
+
+**Expected Output:** Columns `user_id` and `masked_ssn`.
+
+---
+## Puzzle 49: Dense Ranking Scores (Medium)
+
+**Task:** Assign a dense rank to players in a `scores` table based on their `score`, showing ties without gaps.
+
+**Setup Code:** (Create `scores` table with `player_id` and `score`.)
+
+**Hint:** Use `DENSE_RANK() OVER (ORDER BY score DESC)`.
+
+**Expected Output:** Columns `player_id`, `score`, and `dense_rank`.
+
+---
+## Puzzle 50: Net Sales Calculation with CTEs (Hard)
+
+**Task:** Calculate net sales by subtracting returns from total sales using CTEs on `sales` and `returns` tables.
+
+**Setup Code:** (Use `sales` table from Puzzle 12 and `returns` table from Puzzle 37.)
+
+**Hint:** Use multiple `WITH` clauses to aggregate sales and returns before joining.
+
+**Expected Output:** Columns `product_id` and `net_sales`.
+
+---
+## Puzzle 51: Get counts of unique values for each column (Easy)
+
+**Task:** For a given table, return the count of unique values for each column.
+
+**Setup Code:** (Create `sales` table from Puzzle 12.)
+
+**Hint:** Use `COUNT(DISTINCT column_name)` for each column.
+
+**Expected Output:** A table with columns `column_name` and `unique_count`.
+
+---
+
+## Puzzle 52: Given a table with columns a, b, and c, find the number of non-null values in each column
+
+**Task:** For a given table, return the count of non-null values for each column.
+
+**Setup Code:** (Load `sensor_readings` table from above.)
+
+**Hint:** Use `COUNT(column_name)` for each column.
+
+**Expected Output:** A table with columns `column_name` and `non_null_count`.
+
+---
+
+## Puzzle 53: Differences between tables (Easy)
+
+**Task:** Given two tables C and D, count the number of rows whose id occurs only in C and not D, and vice versa (D and not C).
+
+**Setup Code:** (Create tables `C` and `D`.)
+
+**Hint:** Use `EXCEPT` or `LEFT JOIN` to find unique rows in each table.
+
+**Expected Output:** A table with columns `id_col` and `value` showing the unique rows in each table.
+
+Schema C: id_col (int), value (string)
+
+Schema D: id_col (int), value (string)
+
+
+## Puzzle 54: Imputation
+
+**Task:** Given a table with columns `id`, `education`, and `income`, impute the missing values of `income` using the average income of people with the same education level.
+
+**Setup Code:** (Create `imputation_table` with columns `id`, `education`, and `income`.)
+
+```python
+# Run these lines one by one in the CLI
+/create imputation_table
+imputation_table['id'] = [1, 2, 3, 4, 5]
+imputation_table['education'] = [12, 16, 12, 13, 17]
+imputation_table['income'] = [0.45, 0.65, None, 0.85, None]
+```
+
+**Hint:** Use `AVG()` with `GROUP BY` to calculate the average income for each education level.
+
+**Expected Output:** A table with columns `id`, `education`, and `income` with imputed values.
+
