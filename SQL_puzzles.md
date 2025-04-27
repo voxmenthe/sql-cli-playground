@@ -279,10 +279,10 @@ purchases['amount'] = [50.0, 120.0, 30.0, 450.0, 600.0, 80.0, 25.0, 700.0]
 /create daily_sales
 daily_sales['sale_date'] = ['2023-01-01', '2023-01-02', '2023-01-03', '2023-01-01', '2023-01-02', '2023-01-03']
 daily_sales['product_id'] = [10, 10, 10, 20, 20, 20]
-daily_sales['sales_amount'] = [100, 110, 105, 50, 55, 60]
+daily_sales['sales_amount'] = [200, 210, 215, 70, 75, 80]
 # Convert date string to actual date type if needed by the specific SQL environment
 # In sqlite-web or similar, date strings might work directly for comparisons
-# If not, you might need: daily_sales['sale_date'] = pd.to_datetime(daily_sales['sale_date']) # before loading
+# If not, you might need: daily_sales['sale_date'] = pd.to_datetime(daily_sales['sale_date']) # before loading - anyway this works fine for the current sqlite3 environment
 ```
 
 **Hint:** Window functions like `LAG()` are ideal for this. You need to partition by the product and order by date to look back correctly. Handle the first day for each product where there's no previous day.
@@ -737,6 +737,17 @@ predictions['predicted_label'] = [1, 1, 0, 1, 0, 1, 1, 0, 0, 0]
 **Task:** Given two tables C and D, count the number of rows whose id occurs only in C and not D, and vice versa (D and not C).
 
 **Setup Code:** (Create tables `C` and `D`.)
+
+```python
+# Run these lines one by one in the CLI
+/create C
+C['id_col'] = [1, 2, 3, 4, 5, 9, 9, 8] # 5 rows w/ id only in C
+C['value'] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+
+/create D
+D['id_col'] = [4, 5, 6, 7, 8, 11, 11, 12, 13, 14, 15] # 8 rows w/ id only in D
+D['value'] = ['I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S']
+```
 
 **Hint:** Use `EXCEPT` or `LEFT JOIN` to find unique rows in each table.
 

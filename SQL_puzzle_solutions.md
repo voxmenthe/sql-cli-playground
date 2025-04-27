@@ -221,6 +221,79 @@ SELECT
 FROM daily_sales;
 ```
 
+## Puzzle 19: Data Cleaning - Identifying Missing Values (Easy)
+
+```sql
+SELECT * FROM sensor_readings WHERE temperature IS NULL;
+```
+
+## Puzzle 20: Data Sampling (Medium)
+
+```sql
+SELECT * FROM user_sessions ORDER BY RANDOM() LIMIT 10;
+```
+
+```sql
+SELECT * FROM user_sessions
+ORDER BY RANDOM()
+LIMIT (SELECT COUNT(*)/2 FROM user_sessions);
+```
+
+## Puzzle 21: A/B Testing Analysis - Basic Comparison (Medium)
+
+```sql
+WITH purchasers AS (
+  SELECT DISTINCT user_id
+  FROM user_actions
+  WHERE action_type = 'purchase'
+)
+SELECT
+  eu.group_name,
+  100.0
+    * SUM(CASE WHEN p.user_id IS NOT NULL THEN 1 ELSE 0 END)
+    / COUNT(*) AS conversion_rate
+FROM experiment_users eu
+LEFT JOIN purchasers p
+  ON eu.user_id = p.user_id
+GROUP BY eu.group_name
+ORDER BY eu.group_name;
+```
+
+```sql
+WITH purchasers AS (
+  SELECT user_id
+  FROM user_actions
+  WHERE action_type = 'purchase'
+),
+ac AS (
+  SELECT
+    eu.group_name,
+    COUNT(pu.user_id)       AS purchase_count,
+    COUNT(eu.user_id)       AS total_users
+  FROM experiment_users eu
+  LEFT JOIN purchasers pu
+    ON eu.user_id = pu.user_id
+  GROUP BY eu.group_name
+)
+SELECT
+  (SELECT purchase_count * 100.0 / total_users
+   FROM ac
+   WHERE group_name = 'Control')    AS control_conversion,
+  (SELECT purchase_count * 100.0 / total_users
+   FROM ac
+   WHERE group_name = 'Treatment')  AS treatment_conversion;
+```
+
+## Puzzle 22: Time Series Analysis - Simple Moving Average (Hard)
+
+
+
+
+
+
+
+
+
 ## Puzzle 51: Get counts of unique values for each column (Easy)
 
 # rubric only - not working code:
@@ -270,17 +343,26 @@ FROM sensor_readings;
 ```sql
 SELECT COUNT(*) AS count_only_in_C
 FROM C
-LEFT JOIN D ON C.id = D.id
-WHERE D.id IS NULL;
+LEFT JOIN D ON C.id_col = D.id_col
+WHERE D.id_col IS NULL;
 
 SELECT COUNT(*) AS count_only_in_D
 FROM D
-LEFT JOIN C ON D.id = C.id
-WHERE C.id IS NULL;
+LEFT JOIN C ON D.id_col = C.id_col
+WHERE C.id_col IS NULL;
 ```
 
-## Puzzle 53: Differences between tables (Easy)
-
+```sql
+SELECT
+  (SELECT COUNT(*) 
+   FROM C
+   LEFT JOIN D ON C.id_col = D.id_col
+   WHERE D.id_col IS NULL)  AS only_in_C,
+  (SELECT COUNT(*) 
+   FROM D
+   LEFT JOIN C ON D.id_col = C.id_col
+   WHERE C.id_col IS NULL)  AS only_in_D;
+```
 
 ## Puzzle 54: Imputation
 

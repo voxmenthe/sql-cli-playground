@@ -36,7 +36,8 @@ TEMP_TABLE_DIR = Path(__file__).parent / "TEMP_TABLES"
 def _build_completer(tbl_mgr: TableManager) -> WordCompleter:
     words = set(tbl_mgr.tables.keys()) | {
         "SELECT", "FROM", "WHERE", "LIMIT", "INSERT", "UPDATE",
-        "CREATE", "DROP", "DELETE", "COALESCE"}
+        "CREATE", "DROP", "DELETE", "COALESCE", "AS", "GROUP BY", "ORDER BY",
+        "JOIN", "LEFT JOIN", "RANDOM()", "LAG()", "OVER()", "COUNT()", "SUM()", "AVG()", "MAX()", "MIN()", "DISTINCT"}
     # words |= set(dir(np)) | set(dir(pd)) - uncomment to add numpy/pandas functions to auto-completer
     # include column names from all active tables
     for df in tbl_mgr.tables.values():
