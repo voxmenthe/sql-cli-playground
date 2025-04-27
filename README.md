@@ -117,6 +117,7 @@ SELECT col1, col2 FROM table1 LIMIT 3;                            # Run SQL quer
 | `/create <tbl>` | Create a new empty table |
 | `/load <tbl> [<tbl>...]` | Load table(s) from auto-save directory |
 | `/clear <tbl> [<tbl>...]` | Remove table(s) from memory and database |
+| `/clear_all` | Remove all tables from memory and database |
 | `/save <tbl> [file.pkl]` | Save table to .pkl file (default: `<tbl>.pkl`) |
 | `/save_all` | Save all current tables to default directory (this happens on exit as well) |
 | `/export <tbl> [file.csv]` | Export table to .csv file (default: `<tbl>.csv`) |

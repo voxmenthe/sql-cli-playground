@@ -52,6 +52,10 @@ class MetaCommand:
                 if len(cleared) == 1:
                     return f"Table '{cleared[0]}' cleared."
                 return f'Cleared tables: {", ".join(cleared)}.'
+            case "/clear_all":
+                """Clear all tables from the manager and database."""
+                mgr.clear_all()
+                return "All tables cleared."
             case "/save":
                 if len(args) < 1:
                     raise ValueError("Usage: /save <table> [file.pkl]")
@@ -83,6 +87,7 @@ class MetaCommand:
                     "  /create <tbl>         : Create a new empty table\n"
                     "  /load <tbl> [<tbl>...] : Load table(s) from auto-save directory\n"
                     "  /clear <tbl> [<tbl>...] : Remove table(s) from memory and database\n"
+                    "  /clear_all            : Remove all tables from memory and database\n"
                     "  /save <tbl> [f.pkl]   : Save table to .pkl file (default: <tbl>.pkl)\n"
                     "  /save_all             : Save all current tables to default directory\n"
                     "  /export <tbl> [f.csv] : Export table to .csv file (default: <tbl>.csv)\n"

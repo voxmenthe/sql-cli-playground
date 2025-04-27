@@ -286,13 +286,64 @@ SELECT
 
 ## Puzzle 22: Time Series Analysis - Simple Moving Average (Hard)
 
+```sql
+SELECT log_date, visits, AVG(visits) OVER (
+  ORDER BY log_date
+  ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS running_3p
+FROM website_traffic;
+```
 
+## Puzzle 23: User Segmentation - RFM Prep (Medium/Hard)
 
+```sql
+WITH agg AS (
+  SELECT customer_id, COUNT(customer_id) AS frequency, SUM(amount) AS monetary
+  FROM purchases
+  GROUP BY customer_id)
+SELECT c.customer_id, c.name, frequency, monetary
+FROM customers c
+JOIN agg ON c.customer_id = agg.customer_id;
+```
+```sql
+SELECT
+  c.customer_id,
+  c.name,
+  COUNT(p.purchase_id)    AS Frequency,
+  COALESCE(SUM(p.amount), 0) AS Monetary
+FROM customers AS c
+LEFT JOIN purchases AS p
+  ON c.customer_id = p.customer_id
+GROUP BY
+  c.customer_id,
+  c.name;
+```
 
+## Puzzle 24: Anomaly Detection - Simple Thresholding (Medium)
 
+```sql
+WITH avg_duration AS (
+  SELECT AVG(duration_seconds) AS avg_duration
+  FROM user_sessions
+)
+SELECT user_id, AVG(duration_seconds) AS avg_user_duration
+FROM user_sessions
+GROUP BY user_id
+HAVING AVG(duration_seconds) > (
+  SELECT avg_duration * 1.5
+  FROM avg_duration
+);
+```
 
-
-
+```sql
+WITH user_duration AS (
+  SELECT user_id, AVG(duration_seconds) AS user_avg_duration,
+  (SELECT AVG(duration_seconds) FROM user_sessions) AS ttl_avg_duration
+  FROM user_sessions
+  GROUP BY user_id
+)
+SELECT * FROM user_duration
+WHERE user_avg_duration > ttl_avg_duration * 1.5;
+```
 
 ## Puzzle 51: Get counts of unique values for each column (Easy)
 

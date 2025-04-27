@@ -118,6 +118,11 @@ class TableManager:
         except Exception as e:
             raise sqlite3.Error(f"Failed to drop table '{name}': {e}")
 
+    def clear_all(self) -> None:
+        """Remove all tables from the manager and drop them from the database."""
+        for name in list(self.tables.keys()):
+            self.clear(name)
+
     # ---------- sync helpers -----------------------------------------------
     def _push(self, name: str) -> None:
         if name not in self.tables:

@@ -37,7 +37,9 @@ def _build_completer(tbl_mgr: TableManager) -> WordCompleter:
     words = set(tbl_mgr.tables.keys()) | {
         "SELECT", "FROM", "WHERE", "LIMIT", "INSERT", "UPDATE",
         "CREATE", "DROP", "DELETE", "COALESCE", "AS", "GROUP BY", "ORDER BY",
-        "JOIN", "LEFT JOIN", "RANDOM()", "LAG()", "OVER()", "COUNT()", "SUM()", "AVG()", "MAX()", "MIN()", "DISTINCT"}
+        "JOIN", "LEFT JOIN", "RANDOM()", "LAG()", "OVER()", "COUNT()", 
+        "SUM()", "AVG()", "MAX()", "MIN()", "DISTINCT", "PRECEDING", "CURRENT ROW",
+        "HAVING", "CASE", "THEN", "ELSE", "END", "CROSS JOIN"}
     # words |= set(dir(np)) | set(dir(pd)) - uncomment to add numpy/pandas functions to auto-completer
     # include column names from all active tables
     for df in tbl_mgr.tables.values():
@@ -119,8 +121,11 @@ def main() -> None:
                     _render_df(out)
                 elif out is not None: # Could be list of tables or help string
                     console.print(out)
-                # Update globals and completer *only if* tables changed
-                globals_ns.update(tables.tables) # Cheaper than checking, just update
+                # Reset Python context on clear_all
+                if block.raw.strip() == "/clear_all":
+                    globals_ns = {"np": np, "pd": pd}
+                # Update globals and completer
+                globals_ns.update(tables.tables)
                 psession.completer = _build_completer(tables)
             except (ValueError, FileNotFoundError, sqlite3.Error) as e:
                 console.print(f"[red]Error: {e}[/]")
@@ -143,19 +148,32 @@ def main() -> None:
         # -- PYTHON --------------------------------------------------------------
         if isinstance(block, PythonStmt):
             try:
-                exec(block.code, globals_ns)     # noqa: S102 exec is intended
-                # console.print("[green]Python block executed successfully.[/]") # Optional success message
-            except Exception as py_exec_e: # Catch any exec error
-                console.print("[bold red]>>> Python Execution Error:[/]")
-                console.print(f"[red]{type(py_exec_e).__name__}: {py_exec_e}[/]")
-                console.print("[bold red]>>> Traceback:[/]")
-                console.print_exception(max_frames=10) # Increase max_frames
+                # Try to compile as expression
+                expr_code = compile(block.code, '<input>', 'eval')
+            except SyntaxError:
+                # Not an expression; execute as statement
+                try:
+                    exec(block.code, globals_ns)     # noqa: S102 exec is intended
+                except Exception as py_exec_e:
+                    console.print("[bold red]>>> Python Execution Error:[/]")
+                    console.print(f"[red]{type(py_exec_e).__name__}: {py_exec_e}[/]")
+                    console.print("[bold red]>>> Traceback:[/]")
+                    console.print_exception(max_frames=10)
+            else:
+                # It's an expression; evaluate and display result
+                result = eval(expr_code, globals_ns)
+                globals_ns['_'] = result
+                if result is not None:
+                    if isinstance(result, pd.DataFrame):
+                        _render_df(result)
+                    else:
+                        console.print(result)
             finally:
                 # Always push changes after Python execution attempt
                 try:
                     tables.push_all()
                 except sqlite3.Error as e:
-                     console.print(f"[red]DB sync error after Python: {e}[/]")
+                    console.print(f"[red]DB sync error after Python: {e}[/]")
             continue
 
         # -- SQL -----------------------------------------------------------------
