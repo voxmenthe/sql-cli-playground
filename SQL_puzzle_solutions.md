@@ -94,3 +94,31 @@ FROM employees e
 JOIN assignments a ON a.emp_id = e.emp_id
 JOIN projects p ON a.proj_id = p.proj_id
 WHERE e.department = 'Engineering';
+```
+
+## Puzzle 12: Finding Duplicates (Medium)
+```sql
+SELECT name, salary
+FROM employees
+GROUP BY name, salary
+HAVING COUNT(*) > 1;
+```
+
+## Puzzle 13: Nth Highest Value (Hard)
+```sql
+SELECT name, salary
+FROM employees
+WHERE salary = (
+  SELECT salary
+  FROM employees
+  ORDER BY salary DESC
+  LIMIT 1 OFFSET 2
+);
+```
+```sql
+SELECT name, salary
+FROM employees
+ORDER BY salary DESC
+LIMIT 1 OFFSET 2;
+```
+
