@@ -69,11 +69,15 @@ pytest
 
 ## Keyboard Shortcuts ⌨️
 
+**Note that `Return/Enter` only creates a new line, not a submission.**
+
 | Shortcut | Description |
 |----------|-------------|
-| `Meta+Enter` | Submit the current input (Alt+Enter or Esc followed by Enter) |
-| `zz` | Submit the current input (alternative to Meta+Enter) |
-| `Ctrl+D` | Exit the CLI |
+| `Ctrl-Z` | Submit the current input (alternative1). |
+| `Meta+Enter` | Submit the current input (Alt+Enter or Esc followed by Enter) (alternative2) |
+| `zz` | Submit the current input (alternative3) |
+
+| `Ctrl+D` | Exit the CLI (can also use the `/exit` command) |
 
 ## Quick Demo 🎬
 

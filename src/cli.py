@@ -36,8 +36,11 @@ TEMP_TABLE_DIR = Path(__file__).parent / "TEMP_TABLES"
 def _build_completer(tbl_mgr: TableManager) -> WordCompleter:
     words = set(tbl_mgr.tables.keys()) | {
         "SELECT", "FROM", "WHERE", "LIMIT", "INSERT", "UPDATE",
-        "CREATE", "DROP", "DELETE"}
-    words |= set(dir(np)) | set(dir(pd))
+        "CREATE", "DROP", "DELETE", "COALESCE"}
+    # words |= set(dir(np)) | set(dir(pd)) - uncomment to add numpy/pandas functions to auto-completer
+    # include column names from all active tables
+    for df in tbl_mgr.tables.values():
+        words |= set(map(str, df.columns))
     return WordCompleter(list(words), ignore_case=True)
 
 
@@ -73,6 +76,12 @@ def main() -> None:
     @kb.add('z', 'z')
     def _zz(event):
         """Submit the input when 'zz' is pressed."""
+        event.current_buffer.validate_and_handle()
+
+    # Add a key binding for 'Ctrl-Z' to submit
+    @kb.add('c-z')
+    def _ctrl_z(event):
+        """Submit the input when 'Ctrl-Z' is pressed."""
         event.current_buffer.validate_and_handle()
     # -----------------------------
 
