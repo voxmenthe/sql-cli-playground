@@ -345,6 +345,55 @@ SELECT * FROM user_duration
 WHERE user_avg_duration > ttl_avg_duration * 1.5;
 ```
 
+## Puzzle 25: Data Transformation - Finding Min/Max for Scaling (Easy)
+
+```sql
+SELECT MIN(feature1) AS min_feature1, MAX(feature1) AS max_feature1
+FROM ml_data;
+```
+
+And for follow-up to get the scaled feature:
+```sql
+WITH mm AS (
+  SELECT
+    MIN(feature1) AS min1,
+    MAX(feature1) AS max1
+  FROM ml_data
+)
+SELECT
+  md.id,
+  md.feature1,
+  (md.feature1 - mm.min1)  /  (mm.max1 - mm.min1)  AS scaled_feature1
+FROM ml_data AS md
+CROSS JOIN mm;
+```
+
+## Puzzle 26: Model Evaluation Prep - Confusion Matrix Counts (Hard)
+
+```sql
+SELECT
+  SUM(CASE WHEN actual_label = 1 AND predicted_label = 1 THEN 1 ELSE 0 END) AS TP,
+  SUM(CASE WHEN actual_label = 0 AND predicted_label = 1 THEN 1 ELSE 0 END) AS FP,
+  SUM(CASE WHEN actual_label = 0 AND predicted_label = 0 THEN 1 ELSE 0 END) AS TN,
+  SUM(CASE WHEN actual_label = 1 AND predicted_label = 0 THEN 1 ELSE 0 END) AS FN
+FROM predictions;
+```
+
+ELSE is optional in this particular case since null values are skipped
+```sql
+SELECT
+  SUM(CASE WHEN actual_label = 1 and predicted_label = 1 THEN 1 END) AS TP,
+  SUM(CASE WHEN actual_label = 0 and predicted_label = 1 THEN 1 END) AS FP,
+  SUM(CASE WHEN actual_label = 0 and predicted_label = 0 THEN 1 END) AS TN,
+  SUM(CASE WHEN actual_label = 1 and predicted_label = 0 THEN 1 END) AS FN
+FROM predictions;
+```
+
+## Puzzle 27: Handling Missing Values - Imputation (Medium)
+
+
+
+
 ## Puzzle 51: Get counts of unique values for each column (Easy)
 
 # rubric only - not working code:

@@ -350,7 +350,7 @@ user_actions['action_type'] = ['view', 'view', 'view', 'click', 'view', 'purchas
 
 **Hint:** First, identify which users made a purchase. Then, join this information with the experiment group assignments. Finally, aggregate counts per group (total users, converted users) and calculate the rate (converted / total * 100.0). Use `COUNT(DISTINCT user_id)` carefully.
 
-**Expected Output:** A table showing two rows, one for 'Control' and one for 'Treatment', with their respective conversion rates. (Control: User 3 & 5 purchased? / 5 users. Treatment: User 6, 7, 8, 9 purchased? / 5 users).
+**Expected Output:** A table showing two rows, one for 'Control' and one for 'Treatment', with their respective conversion rates. (Control: User 3 & 5 purchased? 2 / 5 users. Treatment: User 7, 8, 9 purchased? 3 / 5 users).
 
 ---
 
@@ -390,6 +390,11 @@ website_traffic['visits'] = [1000, 1100, 1050, 1200, 1150, 1300, 1250]
 **Task:** Identify users whose average session duration is more than 1.5 times the overall average session duration across all users.
 
 **Setup Code:** (Use `user_sessions` table from Puzzle 14)
+Adjust the avg duration for user 1 to be only 10 and user 5 to be 250:
+```python
+user_sessions.loc[user_sessions.user_id == 1,'duration_seconds'] = 10
+user_sessions.loc[user_sessions.user_id == 5,'duration_seconds'] = 250
+```
 
 **Hint:** First, calculate the overall average duration. Then, calculate the average duration per user. Finally, select users whose average duration exceeds the overall average multiplied by 1.5. Subqueries or CTEs (Common Table Expressions) are helpful here.
 
@@ -414,6 +419,8 @@ ml_data['label'] = [0, 1, 0, 1, 0, 1, 1]
 **Hint:** Use the `MIN()` and `MAX()` aggregate functions. You don't need a `GROUP BY` if you want the overall min/max across the whole table.
 
 **Expected Output:** A single row table showing the minimum and maximum values found in `feature1`. (Min: 8.3, Max: 15.0).
+
+**Follow-up:** If you want to scale the `feature1` column, you can use the formula: `(value - min) / (max - min)`.
 
 ---
 
@@ -442,13 +449,20 @@ predictions['predicted_label'] = [1, 1, 0, 1, 0, 1, 1, 0, 0, 0]
 
 ## Puzzle 27: Handling Missing Values - Imputation (Medium)
 
-**Task:** Replace missing `temperature` values in the `sensor_readings` table with the average temperature for the same sensor on the same day.
+**Task:** Replace missing `temperature` values in the `sensors2` table with the average temperature for the same sensor on the same day.
 
-**Setup Code:** (Use `sensor_readings` table from Puzzle 19)
+**Setup Code:** 
+```python
+/create sensors2
+sensors2['reading_id'] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+sensors2['sensor_id'] = ['A', 'B', 'A', 'C', 'B', 'A', 'A', 'B', 'A', 'C', 'B', 'A']
+sensors2['timestamp'] = ['2023-05-01 10:00', '2023-05-01 10:00', '2023-05-01 10:05', '2023-05-01 10:00', '2023-05-01 10:05', '2023-05-01 10:10', '2023-05-02 10:00', '2023-05-02 10:00', '2023-05-02 10:05', '2023-05-02 10:00', '2023-05-02 10:05', '2023-05-04 10:10']
+sensors2['temperature'] = [25.5, 22.0, None, 30.1, None, 26.0, 28.0, 29.2, 27.3, None, 28.5, 27.8] # Using Python's None for NULL
+sensors2['humidity'] = [60, 65, 62, 55, 68, 61, 63, 64, 66, 67, 69, 90]
 
 **Hint:** You'll need to calculate the average temperature per sensor per day first. Then, use this in an `UPDATE` statement or a `SELECT` with `COALESCE()` to replace missing values.
 
-**Expected Output:** The modified `sensor_readings` table with missing `temperature` values replaced.
+**Expected Output:** The modified `sensors2` table with missing `temperature` values replaced.
 
 ---
 
