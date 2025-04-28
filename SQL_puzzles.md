@@ -299,12 +299,11 @@ daily_sales['sales_amount'] = [200, 210, 215, 70, 75, 80]
 
 ```python
 /create sensor_readings
-sensor_readings['reading_id'] = [1, 2, 3, 4, 5, 6]
-sensor_readings['sensor_id'] = ['A', 'B', 'A', 'C', 'B', 'A']
-sensor_readings['timestamp'] = ['2023-05-01 10:00', '2023-05-01 10:00', '2023-05-01 10:05', '2023-05-01 10:00', '2023-05-01 10:05', '2023-05-01 10:10']
-sensor_readings['temperature'] = [25.5, 22.0, None, 30.1, None, 26.0] # Using Python's None for NULL
-sensor_readings['humidity'] = [60, 65, 62, 55, 68, 61]
-```
+sensor_readings['reading_id'] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+sensor_readings['sensor_id'] = ['A', 'B', 'A', 'C', 'B', 'A', 'A', 'B', 'A', 'C', 'B', 'A']
+sensor_readings['timestamp'] = ['2023-05-01 10:00', '2023-05-01 10:00', '2023-05-01 10:05', '2023-05-01 10:00', '2023-05-01 10:05', '2023-05-01 10:10', '2023-05-02 10:00', '2023-05-02 10:00', '2023-05-02 10:05', '2023-05-02 10:00', '2023-05-02 10:05', '2023-05-04 10:10']
+sensor_readings['temperature'] = [25.5, 22.0, None, 30.1, None, 26.0, 28.0, 29.2, 27.3, None, 28.5, 27.8] # Using Python's None for NULL
+sensor_readings['humidity'] = [60, 65, 62, 55, 68, 61, 63, 64, 66, 67, 69, 90]
 
 **Hint:** SQL has a specific operator to check if a value `IS NULL`.
 
@@ -470,7 +469,10 @@ sensors2['humidity'] = [60, 65, 62, 55, 68, 61, 63, 64, 66, 67, 69, 90]
 
 **Task:** Identify and count duplicate rows in the `user_sessions` table.
 
-**Setup Code:** (Use `user_sessions` table from Puzzle 14)
+**Setup Code:** (Use `user_sessions` table from Puzzle 14) and add a duplicate row:
+```python
+user_sessions.loc[(len(user_sessions) + 1)] = [1, 1, 10]
+```
 
 **Hint:** Use `COUNT(*)` with `GROUP BY` on all columns. Then, filter for groups with more than one row.
 
@@ -504,9 +506,16 @@ sensors2['humidity'] = [60, 65, 62, 55, 68, 61, 63, 64, 66, 67, 69, 90]
 
 ## Puzzle 31: Sales Rep Ranking (Medium)
 
-**Task:** Using the `sales` table from Puzzle 12, rank each sales representative by their total sales amount, showing the `rep_id`, `total_sales`, and assign a `sales_rank`.
+**Task:** Using the `sales` table, rank each sales representative by their total sales amount, showing the `rep_id`, `total_sales`, and assign a `sales_rank`.
 
-**Setup Code:** (Use `sales` table from Puzzle 12)
+**Setup Code (Run in CLI):**
+
+```python
+/create sales
+sales['sale_id'] = [1, 2, 3, 4, 5, 6]
+sales['rep_id'] = [101, 102, 101, 103, 102, 101]
+sales['amount'] = [500, 300, 200, 400, 600, 150]
+```
 
 **Hint:** Use `SUM(amount) OVER (PARTITION BY rep_id)` to compute totals and `DENSE_RANK() OVER (ORDER BY total_sales DESC)` to assign ranks.
 
@@ -515,9 +524,14 @@ sensors2['humidity'] = [60, 65, 62, 55, 68, 61, 63, 64, 66, 67, 69, 90]
 ---
 ## Puzzle 32: Cumulative Monthly Revenue (Medium)
 
-**Task:** Calculate cumulative revenue month over month using the `sales` table from Puzzle 12. Include `month`, `revenue`, and `cumulative_revenue`.
+**Task:** Calculate cumulative revenue month over month using the `sales_series` table. Include `month`, `revenue`, and `cumulative_revenue`.
 
-**Setup Code:** (Use `sales` table from Puzzle 12)
+**Setup Code:** 
+```python
+/create sales_series
+sales_series['month'] = ['2021-01', '2021-02', '2021-03', '2021-04', '2021-05', '2021-06', '2021-07', '2021-08', '2021-09', '2021-10', '2021-11', '2021-12']
+sales_series['amount'] = [1200, 1500, 1300, 0, 1600, 1400, 1700, 1800, 1550, 1650, 1750, 1850]
+```
 
 **Hint:** Use `SUM(amount) OVER (ORDER BY month ROWS UNBOUNDED PRECEDING)`.
 
@@ -526,9 +540,16 @@ sensors2['humidity'] = [60, 65, 62, 55, 68, 61, 63, 64, 66, 67, 69, 90]
 ---
 ## Puzzle 33: Top N Employees by Department (Medium)
 
-**Task:** Find the top 2 highest paid employees in each department using the `employees` table from Puzzle 5. Return `department`, `employee_name`, and `salary`.
+**Task:** Find the top 2 highest paid employees in each department using the `employees2` table. Return `department`, `employee_name`, and `salary`.
 
-**Setup Code:** (Use `employees` table from Puzzle 5)
+**Setup Code:**
+```python
+/create employees2
+employees2['emp_id'] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+employees2['name'] = ['Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank', 'Grace', 'Hank', 'Ivy', 'Jack']
+employees2['department'] = ['HR', 'Engineering', 'Engineering', 'HR', 'Sales', 'Sales', 'Engineering', 'HR', 'Engineering', 'Sales']
+employees2['salary'] = [60000, 80000, 85000, 65000, 70000, 75000, 90000, 30000, 45000, 25000]
+```
 
 **Hint:** Use `ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC)` and filter on `row_num <= 2`.
 
@@ -548,9 +569,14 @@ sensors2['humidity'] = [60, 65, 62, 55, 68, 61, 63, 64, 66, 67, 69, 90]
 ---
 ## Puzzle 35: Organizational Hierarchy (Hard)
 
-**Task:** Show the full management chain for each employee using the `employees` table from Puzzle 5.
+**Task:** Show the full management chain for each employee using the `employees2` table from Puzzle 33 and the managers2 table defined below.
 
-**Setup Code:** (Use `employees` table from Puzzle 5)
+**Setup Code:** (Use `employees2` table from Puzzle 33 and the managers2 table defined below)
+```python
+/create managers2
+managers2['emp_id'] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+managers2['manager_id'] = [2, 7, 6, 2, 6, 7, None, 1, 3, 5]
+```
 
 **Hint:** Use a `WITH RECURSIVE` CTE to traverse the hierarchy.
 
@@ -789,4 +815,3 @@ imputation_table['income'] = [0.45, 0.65, None, 0.85, None]
 **Hint:** Use `AVG()` with `GROUP BY` to calculate the average income for each education level.
 
 **Expected Output:** A table with columns `id`, `education`, and `income` with imputed values.
-

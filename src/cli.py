@@ -35,11 +35,12 @@ TEMP_TABLE_DIR = Path(__file__).parent / "TEMP_TABLES"
 
 def _build_completer(tbl_mgr: TableManager) -> WordCompleter:
     words = set(tbl_mgr.tables.keys()) | {
-        "SELECT", "FROM", "WHERE", "LIMIT", "INSERT", "UPDATE",
-        "CREATE", "DROP", "DELETE", "COALESCE", "AS", "GROUP BY", "ORDER BY",
+        "SELECT", "FROM", "WHERE", "LIMIT", "INSERT", "UPDATE", "PRAGMA",
+        "table_info", "CREATE", "DROP", "DELETE", "COALESCE", "AS", "GROUP BY", "ORDER BY",
         "JOIN", "LEFT JOIN", "RANDOM()", "LAG()", "OVER()", "COUNT()", 
         "SUM()", "AVG()", "MAX()", "MIN()", "DISTINCT", "PRECEDING", "CURRENT ROW",
-        "HAVING", "CASE", "WHEN","THEN", "ELSE", "END", "CROSS JOIN"}
+        "HAVING", "CASE", "WHEN","THEN", "ELSE", "END", "CROSS JOIN", "NULLIF", 
+        "WITH", "RECURSIVE"}
     # words |= set(dir(np)) | set(dir(pd)) - uncomment to add numpy/pandas functions to auto-completer
     # include column names from all active tables
     for df in tbl_mgr.tables.values():
@@ -178,37 +179,30 @@ def main() -> None:
 
         # -- SQL -----------------------------------------------------------------
         if isinstance(block, SqlBlock):
+            sql = block.sql
+            first_word = sql.strip().split()[0].upper()
             df_result = None
-            try:
-                # Try reading as a query first (SELECT, PRAGMA)
-                df_result = pd.read_sql_query(block.sql, conn)
-                globals_ns["_"] = df_result # Store last result
-            except (pd.io.sql.DatabaseError, sqlite3.OperationalError) as e:
-                # If read_sql fails, it might be DML/DDL or an error
-                if "cannot operate on a closed database" in str(e).lower() or \
-                   "no statement executed" in str(e).lower() :
-                    # Likely DML/DDL, try executescript
-                    try:
-                        conn.executescript(block.sql)
-                        conn.commit() # Commit changes for DML/DDL
-                        console.print("[green]OK.[/]")
-                    except sqlite3.Error as exec_e:
-                         console.print(f"[red]SQL Error: {exec_e.__class__.__name__}: {exec_e}[/]")
-                else:
-                    # It was likely a genuine error in a SELECT-like query
-                    console.print(f"[red]SQL Error: {e.__class__.__name__}: {e}[/]")
-            except Exception as e: # Catch other potential pandas/SQL errors
-                 console.print(f"[bold red]Unexpected SQL Error:[/]\n[red]{type(e).__name__}: {e}[/]")
-            finally:
-                 # Refresh Python view of tables if SQL might have changed them
-                 try:
-                     tables.refresh_all()
-                     globals_ns.update(tables.tables) # Ensure globals reflect refreshed state
-                     psession.completer = _build_completer(tables) # Update completer
-                 except sqlite3.Error as e:
-                      console.print(f"[red]DB sync error after SQL: {e}[/]")
+            if first_word in ("SELECT", "PRAGMA", "WITH", "EXPLAIN"):
+                try:
+                    df_result = pd.read_sql_query(sql, conn)
+                    globals_ns["_"] = df_result
+                except Exception as e:
+                    console.print(f"[red]SQL Error: {type(e).__name__}: {e}[/]")
+            else:
+                try:
+                    conn.executescript(sql)
+                    conn.commit()
+                    console.print("[green]OK.[/]")
+                except sqlite3.Error as e:
+                    console.print(f"[red]SQL Error: {type(e).__name__}: {e}[/]")
 
-            # Render result *after* refresh_all, only if read_sql succeeded
+            try:
+                tables.refresh_all()
+                globals_ns.update(tables.tables)
+                psession.completer = _build_completer(tables)
+            except sqlite3.Error as e:
+                console.print(f"[red]DB sync error after SQL: {e}[/]")
+
             if df_result is not None:
                 _render_df(df_result)
 

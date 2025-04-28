@@ -391,8 +391,171 @@ FROM predictions;
 
 ## Puzzle 27: Handling Missing Values - Imputation (Medium)
 
+```sql
+WITH averages AS (
+  SELECT sensor_id, DATE(timestamp) AS day,
+  COALESCE(AVG(temperature), (SELECT AVG(temperature) FROM sensors2)) AS imputed_temperature
+  FROM sensors2
+  GROUP BY sensor_id, day)
+SELECT s.reading_id, s.sensor_id, s.timestamp, s.humidity,
+COALESCE(s.temperature, a.imputed_temperature) AS temperature
+FROM sensors2 s
+LEFT JOIN averages a
+ON s.sensor_id = a.sensor_id AND DATE(s.timestamp) = a.day;
+```
 
+Or update in place:
+```sql
+UPDATE sensors2
+SET temperature = (
+  SELECT COALESCE(AVG(temperature), (SELECT AVG(temperature) FROM sensors2))
+  FROM sensors2 t
+  WHERE t.sensor_id = sensors2.sensor_id
+    AND DATE(t.timestamp) = DATE(sensors2.timestamp)
+)
+WHERE temperature IS NULL;
+```
 
+## Puzzle 28: Data Quality Check - Duplicate Rows (Easy)
+
+```sql
+SELECT *
+FROM (
+  SELECT 
+    *,
+    COUNT(*) OVER (PARTITION BY user_id, duration_seconds) as ct
+  FROM user_sessions
+) t
+WHERE ct > 1;
+```
+
+## Puzzle 29: Data Normalization - Scaling (Medium)
+
+```sql
+WITH mm AS (
+  SELECT
+    MAX(feature1) as max1,
+    MIN(feature1) as min1,
+    MAX(feature2) as max2,
+    MIN(feature2) as min2
+  FROM ml_data
+)
+SELECT ml.id, ml.feature1, ml.feature2, ml.label,
+(feature1 - mm.min1) * 1.0 / NULLIF(mm.max1 - mm.min1, 0) AS feature1_scaled, -- needed to avoid int/int tructation and division by zero
+(feature2 - mm.min2) * 1.0 / NULLIF(mm.max2 - mm.min2, 0) AS feature2_scaled -- needed to avoid int/int tructation and division by zero
+FROM ml_data ml
+CROSS JOIN mm;
+```
+
+## Puzzle 30: Data Visualization Prep - Aggregating for Plotting (Medium)
+
+```sql
+SELECT id, feature1,
+  CASE
+    WHEN feature1 < 10 THEN 'bin1'
+    WHEN feature1 < 13 THEN 'bin2'
+    ELSE 'bin3' END AS bin,
+  COUNT(*) as cnt
+FROM ml_data
+GROUP BY bin
+ORDER BY bin;
+```
+
+## Puzzle 31: Sales Rep Ranking (Medium)
+
+```sql
+WITH ttl AS (
+  SELECT
+    rep_id, SUM(amount) AS total_sales
+  FROM sales
+  GROUP BY rep_id
+)
+SELECT rep_id, total_sales,
+DENSE_RANK() OVER (ORDER BY total_sales DESC) AS sales_rank
+FROM ttl;
+```
+
+## Puzzle 32: Cumulative Monthly Revenue (Medium)
+
+```sql
+SELECT month, amount AS revenue,
+SUM(amount) OVER (ORDER BY month ROWS UNBOUNDED PRECEDING) AS cumulative_revenue
+FROM sales_series;
+```
+
+```sql
+SELECT amount AS revenue,
+SUM(amount) OVER (ORDER BY month ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cumulative_revenue
+FROM sales_series;
+```
+
+## Puzzle 33: Top N Employees by Department (Medium)
+
+```sql
+WITH rnk AS (
+  SELECT emp_id,
+  ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS salary_rank
+  FROM employees2
+)
+SELECT e.name, e.department, e.salary, rnk.salary_rank
+FROM employees2 e
+JOIN rnk ON e.emp_id = rnk.emp_id
+WHERE rnk.salary_rank <=2
+ORDER BY department, salary_rank;
+```
+
+## Puzzle 34: Employee-Manager Self-Join (Easy)
+
+```sql
+SELECT
+  e.emp_id, e.name AS employee_name, m2.name AS manager_name
+FROM employees e
+JOIN managers AS mgr
+ON e.emp_id = mgr.emp_id
+LEFT JOIN employees m2
+ON mgr.manager_id = m2.emp_id;
+```
+
+## Puzzle 35: Organizational Hierarchy (Hard)
+
+```sql
+WITH RECURSIVE emp_mgr(emp_id, employee_name, manager_id, manager_chain) AS (
+  -- anchor: every employee, start with empty TEXT chain
+  SELECT
+    e.emp_id,
+    e.name,
+    m.manager_id,
+    '' 
+  FROM employees2 e
+  LEFT JOIN managers2 m
+    ON e.emp_id = m.emp_id
+
+  UNION ALL
+
+  -- recurse: look up next manager, append name
+  SELECT
+    em.emp_id,
+    em.employee_name,
+    m2.manager_id,
+    CASE
+      WHEN em.manager_chain = '' 
+        THEN mgr.name
+      ELSE em.manager_chain || ' > ' || mgr.name
+    END
+  FROM emp_mgr em
+  JOIN employees2 mgr
+    ON em.manager_id = mgr.emp_id
+  LEFT JOIN managers2 m2
+    ON mgr.emp_id = m2.emp_id
+)
+SELECT
+  emp_id,
+  employee_name,
+  manager_chain
+FROM emp_mgr
+WHERE manager_id IS NULL
+ORDER BY emp_id;
+```
 
 ## Puzzle 51: Get counts of unique values for each column (Easy)
 
