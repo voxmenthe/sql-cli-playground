@@ -557,6 +557,19 @@ WHERE manager_id IS NULL
 ORDER BY emp_id;
 ```
 
+## Puzzle 36: Customers Without Purchases (Easy)
+
+```sql
+SELECT c.customer_id, c.name
+FROM customers c
+LEFT JOIN purchases p
+ON c.customer_id = p.customer_id
+WHERE p.purchase_id IS NULL;
+```
+
+## 
+
+
 ## Puzzle 51: Get counts of unique values for each column (Easy)
 
 # rubric only - not working code:

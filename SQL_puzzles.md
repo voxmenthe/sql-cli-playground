@@ -588,6 +588,9 @@ managers2['manager_id'] = [2, 7, 6, 2, 6, 7, None, 1, 3, 5]
 **Task:** Identify customers who have never made a purchase from the `customers` and `purchases` tables used in Puzzle 9.
 
 **Setup Code:** (Use `customers` and `purchases` tables from Puzzle 9)
+Add customers who haven't made purchases:
+customers.loc[(len(customers) + 1)] = [7, 'Bob']
+customers.loc[(len(customers) + 1)] = [8, 'Mary']
 
 **Hint:** Use `LEFT JOIN` or `EXCEPT` to find customers with no matching purchases.
 
@@ -596,9 +599,20 @@ managers2['manager_id'] = [2, 7, 6, 2, 6, 7, None, 1, 3, 5]
 ---
 ## Puzzle 37: Common Products (Easy)
 
-**Task:** Find products that appear in both the `sales` table (from Puzzle 12) and a `returns` table you create.
+**Task:** Find products that appear in both the `product_sales` table and a `returns` table.
 
-**Setup Code:** (Assume or create a `returns` table with columns `return_id`, `product_id`, and `quantity`.)
+**Setup Code:** (Create a `product_sales` table and a `returns` table. The `returns` table has columns `return_id`, `product_id`, and `quantity`.)
+
+```python
+/create product_sales
+product_sales['product_id'] = [101, 102, 103, 104, 102]
+product_sales['quantity'] = [10, 20, 30, 40, 15]
+
+/create returns
+returns['return_id'] = [1, 2, 3]
+returns['product_id'] = [102, 104, 106]
+returns['quantity'] = [2, 5, 1]
+```
 
 **Hint:** Use `INTERSECT` to find shared `product_id`s.
 
