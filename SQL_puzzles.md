@@ -601,7 +601,7 @@ customers.loc[(len(customers) + 1)] = [8, 'Mary']
 
 **Task:** Find products that appear in both the `product_sales` table and a `returns` table.
 
-**Setup Code:** (Create a `product_sales` table and a `returns` table. The `returns` table has columns `return_id`, `product_id`, and `quantity`.)
+**Setup Code:** 
 
 ```python
 /create product_sales
@@ -621,9 +621,17 @@ returns['quantity'] = [2, 5, 1]
 ---
 ## Puzzle 38: Monthly Sales Pivot (Medium)
 
-**Task:** Pivot the `sales` table from Puzzle 12 so months become columns and rows show `product_id` with total sales per month.
+**Task:** Pivot the `product_sales2` table so months become columns and rows show `product_id` with total sales per month.
 
-**Setup Code:** (Use `sales` table from Puzzle 12)
+**Setup Code:** 
+
+```python
+/create product_sales2
+product_sales2['month'] = ['2023-01', '2023-02', '2023-03', '2023-04', '2023-05', '2023-06']
+product_sales2['product_id'] = [101, 102, 103, 104, 102, 103]
+product_sales2['quantity'] = [10, 20, 30, 40, 15, 20]
+product_sales2['price'] = [1, 2, 3, 4, 2, 3]
+```
 
 **Hint:** Use `CASE` expressions with `SUM()` and `GROUP BY`, or a `PIVOT` clause if supported.
 
@@ -636,6 +644,14 @@ returns['quantity'] = [2, 5, 1]
 
 **Setup Code:** (Create `survey` table with sample answers for `q1`, `q2`, and `q3`.)
 
+```python
+/create survey
+survey['response_id'] = [101, 102, 103, 104]
+survey['q1'] = ['High', 'Medium', 'Low', 'High']      # satisfaction level
+survey['q2'] = ['Yes', 'No', 'Yes', 'No']            # would recommend
+survey['q3'] = ['Daily', 'Weekly', 'Monthly', 'Daily']  # usage frequency
+```
+
 **Hint:** Use `UNION ALL` or the `UNPIVOT` operator.
 
 **Expected Output:** Columns `response_id`, `question`, and `answer`.
@@ -647,6 +663,17 @@ returns['quantity'] = [2, 5, 1]
 
 **Setup Code:** (Create `json_data` table with a `data` JSON column.)
 
+```python
+/create json_data
+json_data['id'] = [1, 2, 3, 4]
+json_data['data'] = [
+    '{"user": {"id": 101, "name": "John"}, "order": {"total": 100}}',
+    '{"user": {"id": 102, "name": "Jane"}, "order": {"total": 200}}',
+    '{"user": {"id": 103, "name": "Bob"}, "order": {"total": 300}}',
+    '{"user": {"id": 104, "name": "Alice"}, "order": {"total": 400}}'
+]
+```
+
 **Hint:** Use `JSON_EXTRACT()`, `->>`, or equivalent functions.
 
 **Expected Output:** A table with `user_id` and `order_total`.
@@ -656,7 +683,13 @@ returns['quantity'] = [2, 5, 1]
 
 **Task:** Find articles containing the keyword “database” in an `articles` table.
 
-**Setup Code:** (Create `articles` table with `article_id` and `content`.)
+**Setup Code:** 
+
+```python
+/create articles
+articles['article_id'] = [1, 2, 3, 4, 5]
+articles['content'] = ['database management', 'design', 'database optimization', 'warehouse performance', 'internal database security']
+```
 
 **Hint:** Use `LIKE '%database%'` or full-text search functions if available.
 
@@ -667,7 +700,13 @@ returns['quantity'] = [2, 5, 1]
 
 **Task:** Calculate a 3-point moving average in a `measurements` table, excluding the current row.
 
-**Setup Code:** (Use `measurements` table from Puzzle 7.)
+**Setup Code:** 
+
+```python
+/create measurements
+measurements['reading_id'] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+measurements['value'] = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+```
 
 **Hint:** Define window frame with `ROWS BETWEEN 3 PRECEDING AND 1 PRECEDING`.
 
@@ -676,9 +715,9 @@ returns['quantity'] = [2, 5, 1]
 ---
 ## Puzzle 43: Top Percentile Employees (Medium)
 
-**Task:** Identify employees in the top 10% salary bracket from the `employees` table in Puzzle 5.
+**Task:** Identify employees in the top 10% salary bracket from the `employees2` table in Puzzle 33.
 
-**Setup Code:** (Use `employees` table from Puzzle 5.)
+**Setup Code:** (Use `employees2` table from Puzzle 33.)
 
 **Hint:** Use `CUME_DIST()` or `PERCENT_RANK()`.
 
@@ -687,9 +726,15 @@ returns['quantity'] = [2, 5, 1]
 ---
 ## Puzzle 44: Conditional Aggregation by Status (Easy)
 
-**Task:** Count the number of orders in each `status` category from the `orders` table in Puzzle 11.
+**Task:** Count the number of orders in each `status` category from the `order_status` table.
 
-**Setup Code:** (Use `orders` table from Puzzle 11.)
+**Setup Code:**
+
+```python
+/create order_status
+order_status['order_id'] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+order_status['status'] = ['Shipped', 'Pending', 'Shipped', 'Delivered', 'Pending', 'Shipped', 'Delivered', 'Shipped', 'Pending', 'Delivered']
+```
 
 **Hint:** Use `SUM(CASE WHEN status = '...' THEN 1 ELSE 0 END)` grouped by `status`.
 
@@ -698,20 +743,31 @@ returns['quantity'] = [2, 5, 1]
 ---
 ## Puzzle 45: Latest Order Per Customer (Hard)
 
-**Task:** For each customer, show their most recent order using `customers` (Puzzle 9) and `orders` (Puzzle 11).
+**Task:** For each customer, show their most recent order using `customers` and `purchases` tables from Puzzle 17.
 
-**Setup Code:** (Use `customers` and `orders` tables.)
+**Setup Code:** (Use `customers` and `purchases` tables.)
+Add an order_date column to purchases table
+```python
+purchases['order_date'] = ['2023-01-01', '2023-01-02', '2023-01-03', '2023-01-04', '2023-01-05', '2023-01-06', '2023-01-07', '2023-01-08']
+```
 
 **Hint:** Use a lateral join or subquery with `MAX(order_date)`.
 
 **Expected Output:** Columns `customer_id`, `customer_name`, and latest `order_id`.
 
 ---
-## Puzzle 46: Geospatial Distance Filter (Hard)
+## Puzzle 46: Geospatial Distance Filter (Hard) - maybe too difficult
 
 **Task:** Given a `locations` table with `lat` and `lon`, find points within 10 km of a reference point.
 
 **Setup Code:** (Create `locations` table with sample latitude/longitude.)
+
+```python
+/create locations
+locations['id'] = [1, 2, 3, 4, 5]
+locations['lat'] = [40.7128, 34.0522, 37.7749, 47.6062, 33.7489]
+locations['lon'] = [-74.006, -118.2437, -122.4194, -122.3321, -118.2437]
+```
 
 **Hint:** Use the Haversine formula or spatial functions if supported.
 
@@ -724,7 +780,12 @@ returns['quantity'] = [2, 5, 1]
 
 **Setup Code:** (Use `customers` table with `last_login` date.)
 
-**Hint:** Use date functions like `CURRENT_DATE - last_login > 30`.
+```python
+# Add a last_login column to customers table
+customers['last_login'] = ['2023-01-01', '2023-01-02', '2023-01-03', '2023-01-04', '2023-01-05', '2025-04-29']
+```
+
+**Hint:** Use date functions like `julianday(CURRENT_DATE) - julianday(last_login) > 30`.
 
 **Expected Output:** List of `customer_id` and `last_login` older than 30 days.
 

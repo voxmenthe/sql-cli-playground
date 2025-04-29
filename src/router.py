@@ -125,6 +125,10 @@ def classify(text: str) -> MetaCommand | SqlBlock | PythonStmt:
     # Treat as SQL if the stripped text ends with ;
     if stripped_text.endswith(";"):
         return SqlBlock(stripped_text) # Use stripped text for SQL check
+    
+    # Also treat as SQL block if it starts with common SQL keywords (no semicolon needed)
+    if stripped_text.upper().startswith(("SELECT ", "WITH ", "PRAGMA ", "EXPLAIN ")):
+        return SqlBlock(stripped_text)
 
     # Otherwise, it's Python. Use the original text for exec().
     return PythonStmt(text) 

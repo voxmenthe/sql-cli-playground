@@ -567,7 +567,170 @@ ON c.customer_id = p.customer_id
 WHERE p.purchase_id IS NULL;
 ```
 
-## 
+## Puzzle 37: Common Products (Easy)
+
+```sql
+SELECT product_id FROM product_sales
+INTERSECT
+SELECT product_id FROM returns;
+```
+
+## Puzzle 38: Monthly Sales Pivot (Medium)
+
+```sql
+SELECT product_id,
+SUM(CASE WHEN month = '2023-01' THEN quantity ELSE 0 END) AS jan_sales,
+SUM(CASE WHEN month = '2023-02' THEN quantity ELSE 0 END) AS feb_sales,
+SUM(CASE WHEN month = '2023-03' THEN quantity ELSE 0 END) AS mar_sales,
+SUM(CASE WHEN month = '2023-04' THEN quantity ELSE 0 END) AS apr_sales,
+SUM(CASE WHEN month = '2023-05' THEN quantity ELSE 0 END) AS may_sales,
+SUM(CASE WHEN month = '2023-06' THEN quantity ELSE 0 END) AS jun_sales
+FROM product_sales2
+GROUP BY product_id;
+```
+
+## Puzzle 39: Survey Data Unpivot (Medium)
+
+```sql
+SELECT response_id, 'q1' AS question, q1 AS answer FROM survey
+UNION
+SELECT response_id, 'q2' AS question, q2 AS answer FROM survey
+UNION
+SELECT response_id, 'q3' AS question, q3 AS answer FROM survey;
+```
+
+## Puzzle 40: JSON Data Extraction (Medium)
+
+```sql
+SELECT
+  JSON_EXTRACT(data, '$.user.id') AS user_id,
+  JSON_EXTRACT(data, '$.order.total') AS order_total
+FROM json_data;
+```
+
+## Puzzle 41: Full-Text Search (Medium)
+
+```sql
+SELECT article_id, content
+FROM articles
+WHERE content LIKE '%database%';
+```
+
+## Puzzle 42: Moving Average Excluding Current Row (Hard)
+
+```sql
+SELECT reading_id, value,
+AVG(value) OVER (ORDER BY reading_id ROWS BETWEEN 3 PRECEDING AND 1 PRECEDING) AS moving_avg
+FROM measurements;
+```
+
+## Puzzle 43: Top Percentile Employees (Medium)
+
+```sql
+WITH dists AS (
+  SELECT emp_id, name, salary,
+  PERCENT_RANK() OVER (ORDER BY salary) as salrank,
+  CUME_DIST() OVER (ORDER BY salary) as saldist
+  FROM employees2
+)
+SELECT * from dists
+WHERE salrank >= 0.9 OR saldist >= 0.9;
+```
+
+## Puzzle 44: Conditional Aggregation by Status (Easy)
+
+```sql
+SELECT status, COUNT(status) as ct
+FROM order_status
+GROUP BY status;
+```
+
+```sql
+SELECT
+  status,
+  SUM(CASE WHEN status = 'Shipped' THEN 1 ELSE 0 END) AS shipped_count,
+  SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
+  SUM(CASE WHEN status = 'Delivered' THEN 1 ELSE 0 END) AS delivered_count
+FROM order_status
+GROUP BY status;
+```
+
+## Puzzle 45: Latest Order Per Customer (Hard)
+
+```sql
+WITH temp AS (
+  SELECT
+    p.customer_id, c.name, MAX(p.order_date) as most_recent
+  FROM purchases p
+  LEFT JOIN customers c
+  ON c.customer_id = p.customer_id
+  GROUP BY p.customer_id
+)
+SELECT t.customer_id, t.name AS customer_name, p2.purchase_id AS order_id, t.most_recent
+FROM temp t
+LEFT JOIN purchases p2
+ON p2.customer_id = t.customer_id
+AND t.most_recent = p2.order_date;
+```
+
+## Puzzle 46: Geospatial Distance Filter (Hard)
+
+too hard but here's a thought:
+
+```sql
+-- reference point
+PRAGMA foreign_keys = OFF;
+WITH params AS (
+  SELECT
+    40.7128 AS ref_lat,    -- your ref latitude
+    -74.0060 AS ref_lon,   -- your ref longitude
+    10.0    AS max_km      -- 10 km radius
+),
+haversine AS (
+  SELECT
+    l.id,
+    l.lat,
+    l.lon,
+    -- convert degrees to radians: deg * PI()/180
+    2 * 6371.0 *
+    ASIN(
+      SQRT(
+        POWER(
+          SIN(((l.lat - p.ref_lat) * PI()/180) / 2)
+        ,2)
+      + COS(p.ref_lat * PI()/180)
+        * COS(l.lat      * PI()/180)
+        * POWER(
+            SIN(((l.lon - p.ref_lon) * PI()/180) / 2)
+          ,2
+          )
+      )
+    ) AS dist_km
+  FROM locations AS l
+  CROSS JOIN params AS p
+)
+SELECT id, lat, lon, ROUND(dist_km,3) AS distance_km
+FROM haversine
+WHERE dist_km <= (SELECT max_km FROM params)
+ORDER BY dist_km;
+```
+
+## Puzzle 47: Inactive Customers (Easy)
+
+```sql
+SELECT customer_id, last_login
+FROM customers
+WHERE julianday(CURRENT_DATE) - julianday(last_login) > 30;
+```
+
+```sql
+SELECT * FROM customers
+WHERE julianday('now') - julianday(last_login) > 30;
+```
+
+
+## Puzzle 48: Data Masking (Medium)
+
 
 
 ## Puzzle 51: Get counts of unique values for each column (Easy)
