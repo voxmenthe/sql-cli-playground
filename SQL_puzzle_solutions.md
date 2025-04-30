@@ -731,6 +731,30 @@ WHERE julianday('now') - julianday(last_login) > 30;
 
 ## Puzzle 48: Data Masking (Medium)
 
+```sql
+SELECT user_id, SUBSTR(ssn, 1, 3) || SUBSTR(ssn,8,11) as masked_ssn
+FROM users_with_PII;
+```
+
+## Puzzle 49: Dense Ranking Scores (Medium)
+
+```sql
+SELECT player_id, score, DENSE_RANK() OVER (ORDER BY score DESC) as player_rank
+FROM scores;
+```
+
+## Puzzle 50: Net Sales Calculation with CTEs (Hard)
+
+```sql
+WITH merged AS (
+  SELECT ps.product_id, ps.quantity, COALESCE(r.quantity,0) AS returns
+  FROM product_sales ps
+  LEFT JOIN returns r
+  ON ps.product_id = r.product_id
+)
+SELECT product_id, quantity - returns AS net_sales
+FROM merged;
+```
 
 
 ## Puzzle 51: Get counts of unique values for each column (Easy)
@@ -769,6 +793,9 @@ FROM (
 ) t
 GROUP BY col_name;
 ```
+
+
+
 
 ## Puzzle 52: Given a table with columns a, b, and c, find the number of non-null values in each column
 

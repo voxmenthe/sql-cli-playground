@@ -558,7 +558,7 @@ employees2['salary'] = [60000, 80000, 85000, 65000, 70000, 75000, 90000, 30000, 
 ---
 ## Puzzle 34: Employee-Manager Self-Join (Easy)
 
-**Task:** List each employee along with their manager’s name using the `employees` table from Puzzle 5.
+**Task:** List each employee along with their manager's name using the `employees` table from Puzzle 5.
 
 **Setup Code:** (Use `employees` table from Puzzle 5)
 
@@ -681,7 +681,7 @@ json_data['data'] = [
 ---
 ## Puzzle 41: Full-Text Search (Medium)
 
-**Task:** Find articles containing the keyword “database” in an `articles` table.
+**Task:** Find articles containing the keyword "database" in an `articles` table.
 
 **Setup Code:** 
 
@@ -792,9 +792,18 @@ customers['last_login'] = ['2023-01-01', '2023-01-02', '2023-01-03', '2023-01-04
 ---
 ## Puzzle 48: Data Masking (Medium)
 
-**Task:** Mask the middle digits of a Social Security number in a `users` table, showing only the first and last two digits.
+**Task:** Mask the middle digits of a Social Security number in a `users_with_PII` table, showing only the first and last two digits.
 
-**Setup Code:** (Create `users` table with `user_id` and `ssn`.)
+**Setup Code:** (Create `users_with_PII` table with `user_id` and `ssn`.)
+
+```python
+/create users_with_PII
+users_with_PII['user_id'] = range(1, 11)
+# Generate some plausible SSN-like strings (not real SSNs)
+import random
+ssns = [f'{random.randint(100, 999):03}-{random.randint(10, 99):02}-{random.randint(1000, 9999):04}' for _ in range(10)]
+users_with_PII['ssn'] = ssns
+```
 
 **Hint:** Use `SUBSTR()`, `CONCAT()` or equivalent string functions.
 
@@ -807,6 +816,12 @@ customers['last_login'] = ['2023-01-01', '2023-01-02', '2023-01-03', '2023-01-04
 
 **Setup Code:** (Create `scores` table with `player_id` and `score`.)
 
+```python
+/create scores
+scores['player_id'] = range(1, 11)
+scores['score'] = [850, 920, 780, 920, 850, 600, 780, 990, 700, 920] # Include ties
+```
+
 **Hint:** Use `DENSE_RANK() OVER (ORDER BY score DESC)`.
 
 **Expected Output:** Columns `player_id`, `score`, and `dense_rank`.
@@ -814,9 +829,9 @@ customers['last_login'] = ['2023-01-01', '2023-01-02', '2023-01-03', '2023-01-04
 ---
 ## Puzzle 50: Net Sales Calculation with CTEs (Hard)
 
-**Task:** Calculate net sales by subtracting returns from total sales using CTEs on `sales` and `returns` tables.
+**Task:** Calculate net sales by subtracting returns from total sales using CTEs on `product_sales` and `returns` tables.
 
-**Setup Code:** (Use `sales` table from Puzzle 12 and `returns` table from Puzzle 37.)
+**Setup Code:** (Use `product_sales` table from Puzzle 38 and `returns` table from Puzzle 37.)
 
 **Hint:** Use multiple `WITH` clauses to aggregate sales and returns before joining.
 
